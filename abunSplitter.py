@@ -14,6 +14,7 @@ from finisherSCCoreLib import houseKeeper
 import associatedReadFinder
 import readContigGraphFormer
 import repeatFinder
+import abunHouseKeeper
 
 
 ### Abundance split and its subroutines
@@ -431,8 +432,13 @@ def generateAbundanceGraph(folderName, mummerLink):
     
     
     print "len(dataList)", len(dataList)
-    myCountDic =  evaluateCoverage(dataList, lenDic, readLenDic, folderName, mummerLink,  True)
-    extraDataList = alignerRobot.extractMumData(folderName, "abunMissOut" )
+    
+    if not abunHouseKeeper.abunGlobalAvoidrefine: 
+        myCountDic =  evaluateCoverage(dataList, lenDic, readLenDic, folderName, mummerLink,  True)
+        extraDataList = alignerRobot.extractMumData(folderName, "abunMissOut" )
+    else:
+        extraDataList = []
+        
     dataList = dataList + extraDataList
     myCountDic = evaluateCoverage(dataList, lenDic, readLenDic, folderName, mummerLink,False)
     

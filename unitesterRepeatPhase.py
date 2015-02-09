@@ -32,7 +32,7 @@ class repeatPhaserTests(unittest.TestCase):
         self.listOfFiles.append("improved3.fasta")
         self.listOfFiles.append("relatedReads.fasta")
         matchingContigFile = "improved4.fasta"
-        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+        #self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
         
         self.listOfFiles.pop()
         self.listOfFiles.pop()
@@ -49,7 +49,7 @@ class repeatPhaserTests(unittest.TestCase):
         
         matchingContigFile = "tademResolved.fasta"
         
-        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+        #self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
         
         
     def testASplitter(self):
@@ -63,8 +63,25 @@ class repeatPhaserTests(unittest.TestCase):
         
         matchingContigFile = "abun.fasta"
         
-        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+        #self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+    
+    def testASplitterParameterCheck(self):
+        paraTestList = ["-rp improved2.fasta ", "-ar True ", "-rs 0 "]
+        for eachpara in paraTestList:
+            self.runningParaterTestSet(eachpara)
         
+    def runningParaterTestSet(self , parameter):
+        myFolderName = "/Users/kakitlam/Desktop/metaFinisherSC/src/testdata/"
+        ctexpected = 2
+        commandList = []
+        
+        commandList.append("python finisherSCCoreLib/finisherSC.py -par 4 "+ self.testingFolder +" " + self.mummerPath)
+        commandList.append("python aSplitter.py -par 4 " + parameter + self.testingFolder + " " + self.mummerPath )
+        
+        matchingContigFile = "abun.fasta"
+        
+        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+    
         
     def runningTestSet(self ,myFolderName, ctexpected, commandList, matchingContigFile):
         
@@ -84,7 +101,9 @@ class repeatPhaserTests(unittest.TestCase):
         
         assert(len(lenDic) == ctexpected)
         os.system("rm -rf "+ self.testingFolder)
-        
+    
+    
+    
     def tearDown(self):
         print "Teardown : Removing used files "
         

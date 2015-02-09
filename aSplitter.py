@@ -3,6 +3,7 @@ import abunSplitter
 from finisherSCCoreLib import houseKeeper
 import time
 import argparse
+import abunHouseKeeper
 
 t0 = time.time()
 
@@ -15,7 +16,9 @@ parser.add_argument('-par', '--parallel', help= 'Fast aligns contigs (input is m
 parser.add_argument('-l', '--large', help= 'Large number of contigs/large size of contigs (input is True)', required=False)
 
 
-
+parser.add_argument('-rp', '--replace', help= 'Input files to aSplitter(e.g. noEmbed.fasta, improved.fasta, improved2.fasta or improved3.fasta)', required=False)
+parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estimation (input is True)', required=False)
+parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)
 
 args = vars(parser.parse_args())
 
@@ -39,6 +42,23 @@ else:
     houseKeeper.globalLarge = False
 
 
+if args['avoidrefine'] == "True":
+    abunHouseKeeper.abunGlobalAvoidrefine = True
+else:
+    abunHouseKeeper.abunGlobalAvoidrefine = False
+
+
+if args['readsearch'] != None:
+    abunHouseKeeper.abunGlobalReadSearchDepth = int(args['readsearch']) 
+else:
+    abunHouseKeeper.abunGlobalReadSearchDepth = 1
+
+
+if args['replace'] != None : 
+    replacedName = args['replace']
+    abunHouseKeeper.replaceFiles( newFolderName, replacedName) 
+
+    
 if pathExists:
     abunSplitter.mainFlow(newFolderName, newMummerLink)
 else:

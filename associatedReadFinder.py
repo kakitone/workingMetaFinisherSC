@@ -7,6 +7,9 @@ from itertools import groupby
 
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import alignerRobot
+from finisherSCCoreLib import houseKeeper
+
+import abunHouseKeeper
 
 
 def checkSatisfy(eachitem, lenDic):
@@ -50,45 +53,69 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
             i) Align the raws and tmp_seedReads
             ii) Put the new reads into the SeedReads
     '''
+    
     header, referenceFile, queryFile = "seedReads", forFastaName + ".fasta" , "raw_reads.fasta"
     command = "cp " + folderName + "relatedReads.fasta " + folderName + referenceFile
     os.system(command)
-    N = 1
     
-    for trial in range(N):
-        print "trial", trial
-        if True:
-            command = mummerLink + "nucmer --maxmatch --nosimplify -p " + folderName + header + " " + folderName + referenceFile + " " + folderName + queryFile
+    N = abunHouseKeeper.abunGlobalReadSearchDepth
+    
+    print "N: ", N
+    if N >0 :
+        for trial in range(N):
+            print "trial", trial
+            
+            if True: 
+                workerList = []
+                numberOfFiles = 20
+                for dummyI in range(1, numberOfFiles + 1):
+                    indexOfMum = ""
+                    if dummyI < 10:
+                        indexOfMum = "0" + str(dummyI)
+                    else:
+                        indexOfMum = str(dummyI)
+                    
+                    outputName, referenceName, queryName, specialName= header+indexOfMum, referenceFile, "raw_reads.part-"+ indexOfMum + ".fasta",  header + indexOfMum
+                    workerList.append([outputName, referenceName, queryName, specialName])
+    
+                alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,False)
+            
+            dataList = []
+            
+            for i in range(1, 1+numberOfFiles): 
+                if i < 10:
+                    indexOfMum = "0" + str(i)
+                else:
+                    indexOfMum = str(i)
+                dataList = dataList+ alignerRobot.extractMumData(folderName, header+ str(indexOfMum)+"Out")
+            
+            
+            filterList = []
+            
+            lenDicRR = IORobot.obtainLength(folderName, queryFile)
+            
+            print "len(dataList)", len(dataList)
+            for eachitem in dataList:
+                if checkSatisfy(eachitem, lenDicRR):
+                    filterList.append(eachitem)
+                
+            filterList.sort(key=itemgetter(-1))
+            newReads = []
+            
+            for key, items in groupby(filterList, itemgetter(-1)):
+                newReads.append(key)
+                                        
+            
+            f = open(folderName + forFastaName + ".txt", 'w')
+            
+            for eachitem in newReads:
+                f.write(eachitem + "\n")
+            f.close()
+                
+            command = "perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV' " + folderName + forFastaName + ".txt " + folderName + "raw_reads.fasta > " + folderName + forFastaName + ".fasta"
             os.system(command)
-            
-            command = mummerLink + "show-coords -r " + folderName + header + ".delta > " + folderName + header + "Out"
-            os.system(command)
-        
-        dataList = alignerRobot.extractMumData(folderName, header + "Out")
-        filterList = []
-        
-        lenDicRR = IORobot.obtainLength(folderName, queryFile)
-        
-        print "len(dataList)", len(dataList)
-        for eachitem in dataList:
-            if checkSatisfy(eachitem, lenDicRR):
-                filterList.append(eachitem)
-            
-        filterList.sort(key=itemgetter(-1))
-        newReads = []
-        
-        for key, items in groupby(filterList, itemgetter(-1)):
-            newReads.append(key)
-                                    
-        
-        f = open(folderName + forFastaName + ".txt", 'w')
-        
-        for eachitem in newReads:
-            f.write(eachitem + "\n")
-        f.close()
-            
-        command = "perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV' " + folderName + forFastaName + ".txt " + folderName + "raw_reads.fasta > " + folderName + forFastaName + ".fasta"
-        os.system(command)
+    else:
+        os.system("cp " + folderName + "relatedReads.fasta " + folderName + forFastaName + ".fasta")
 
 
 
