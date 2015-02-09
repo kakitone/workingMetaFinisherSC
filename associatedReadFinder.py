@@ -1,0 +1,96 @@
+
+
+import os
+
+from operator import itemgetter
+from itertools import groupby
+
+from finisherSCCoreLib import IORobot
+from finisherSCCoreLib import alignerRobot
+
+
+def checkSatisfy(eachitem, lenDic):
+    # "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
+    threshold = 40
+     
+    seedName = eachitem[-1]
+    detectedName = eachitem[-2]
+    
+    # seedIndices = seedName.split("/")[-1].split("_")
+    # detectIndices = detectedName.split("/")[-1].split("_")
+    # lenSeed = int(seedIndices[1]) - int(seedIndices[0])
+    # lenDetect = int(detectIndices[1]) - int(detectIndices[0])
+    
+    lenSeed = lenDic[seedName]
+    lenDetect = lenDic[detectedName]
+    
+    checkSeed = False
+    checkDetect = False 
+    
+    if eachitem[0] < threshold or eachitem[1] > lenSeed - threshold: 
+        checkSeed = True
+    
+    if min(eachitem[2], eachitem[3]) < threshold or max(eachitem[2], eachitem[3]) > lenDetect - threshold:
+        checkDetect = True
+    
+    if checkSeed and checkDetect: 
+        return True
+    else:
+        return False
+
+
+def getAllAssociatedReads(folderName, mummerLink,forFastaName):
+    '''
+    Input : relatedReads.fasta, raw_reads.fasta 
+    Output : all_associated_reads.fasta
+    
+     Algorithm : 
+        a) Get all the associated reads
+        b) Loop for N=1 times : ==> this correspond 4 reads to link between the bridge in total
+            i) Align the raws and tmp_seedReads
+            ii) Put the new reads into the SeedReads
+    '''
+    header, referenceFile, queryFile = "seedReads", forFastaName + ".fasta" , "raw_reads.fasta"
+    command = "cp " + folderName + "relatedReads.fasta " + folderName + referenceFile
+    os.system(command)
+    N = 1
+    
+    for trial in range(N):
+        print "trial", trial
+        if True:
+            command = mummerLink + "nucmer --maxmatch --nosimplify -p " + folderName + header + " " + folderName + referenceFile + " " + folderName + queryFile
+            os.system(command)
+            
+            command = mummerLink + "show-coords -r " + folderName + header + ".delta > " + folderName + header + "Out"
+            os.system(command)
+        
+        dataList = alignerRobot.extractMumData(folderName, header + "Out")
+        filterList = []
+        
+        lenDicRR = IORobot.obtainLength(folderName, queryFile)
+        
+        print "len(dataList)", len(dataList)
+        for eachitem in dataList:
+            if checkSatisfy(eachitem, lenDicRR):
+                filterList.append(eachitem)
+            
+        filterList.sort(key=itemgetter(-1))
+        newReads = []
+        
+        for key, items in groupby(filterList, itemgetter(-1)):
+            newReads.append(key)
+                                    
+        
+        f = open(folderName + forFastaName + ".txt", 'w')
+        
+        for eachitem in newReads:
+            f.write(eachitem + "\n")
+        f.close()
+            
+        command = "perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV' " + folderName + forFastaName + ".txt " + folderName + "raw_reads.fasta > " + folderName + forFastaName + ".fasta"
+        os.system(command)
+
+
+
+
+    
