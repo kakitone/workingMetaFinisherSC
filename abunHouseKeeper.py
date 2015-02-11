@@ -3,6 +3,7 @@ import os
 
 abunGlobalAvoidrefine = False
 abunGlobalReadSearchDepth = 1
+abunGlobalRRDisable = False
 
 def replaceFiles( folderName, replacedName) :
     commandList = []

@@ -63,16 +63,17 @@ class repeatPhaserTests(unittest.TestCase):
         
         matchingContigFile = "abun.fasta"
         
-        #self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
     
     def testASplitterParameterCheck(self):
         paraTestList = ["-rp improved2.fasta ", "-ar True ", "-rs 0 "]
-        for eachpara in paraTestList:
-            self.runningParaterTestSet(eachpara)
+        #for eachpara in paraTestList:
+        #    self.runningParaterTestSet(eachpara,2)
         
-    def runningParaterTestSet(self , parameter):
+        #self.runningParaterTestSet("-rd True ",2)
+        
+    def runningParaterTestSet(self , parameter,ctexpected):
         myFolderName = "/Users/kakitlam/Desktop/metaFinisherSC/src/testdata/"
-        ctexpected = 2
         commandList = []
         
         commandList.append("python finisherSCCoreLib/finisherSC.py -par 4 "+ self.testingFolder +" " + self.mummerPath)

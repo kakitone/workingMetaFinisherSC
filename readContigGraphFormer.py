@@ -1,9 +1,12 @@
+import os
+import sys 
+
 import abunHouseKeeper
 
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import alignerRobot
 from finisherSCCoreLib import graphLib
-
+from finisherSCCoreLib import houseKeeper
 
 
 def addDataToList(dataList, G, startIndex1, startIndex2, type1, type2):
@@ -25,9 +28,6 @@ def addDataToList(dataList, G, startIndex1, startIndex2, type1, type2):
             print i, j , eachitem
         
         G.insertEdge(i, j, wt) 
-
-
-
 
 # ## Debug check 
 def checkGraphLength(G, N1, lenDicRR):
@@ -51,6 +51,31 @@ def checkGraphLength(G, N1, lenDicRR):
                 if lenDicRR[header] < wt:
                     print lenDicRR[header], lenDicRR[header2], wt
                     print header, header2
+   
+def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header ):   
+    #alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
+    numberOfFiles = 20
+    bindir =  os.path.abspath(os.path.dirname(sys.argv[0]))   
+    command = bindir + "/finisherSCCoreLib/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + queryFile
+    os.system(command)
+    
+    os.system("cp *.fasta " + folderName )
+    os.system("rm *.fasta ")
+    
+    workerList = []
+    
+    for dummyI in range(1, numberOfFiles + 1):
+        indexOfMum = ""
+        if dummyI < 10:
+            indexOfMum = "0" + str(dummyI)
+        else:
+            indexOfMum = str(dummyI)
+       
+        outputName, referenceName, queryName, specialName= header+indexOfMum, referenceFile,queryFile[0:-6]+".part-"+ indexOfMum + ".fasta" ,  header + indexOfMum
+        workerList.append([outputName, referenceName, queryName, specialName])
+        
+    alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = False, refinedVersion = False)
+    alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
                     
 
 def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFilename, optTypeFileHeader, graphName):
@@ -80,17 +105,23 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     dataListCC = abunHouseKeeper.filterData(dataListCC, lenDicCC)
     
     header, referenceFile, queryFile = optTypeFileHeader + "RR", readsetFilename + "_Double.fasta" , readsetFilename + "_Double.fasta"
-    if True:
-        alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
+    
     
     lenDicRR = IORobot.obtainLength(folderName, readsetFilename + "_Double.fasta")
-
-    dataListRR = alignerRobot.extractMumData(folderName, header + "Out")
-    dataListRR = abunHouseKeeper.filterData(dataListRR, lenDicRR)
-
+    
+    if not abunHouseKeeper.abunGlobalRRDisable:
+        if True:
+            alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header )
+    
+        dataListRR = alignerRobot.extractMumData(folderName, header + "Out")
+        dataListRR = abunHouseKeeper.filterData(dataListRR, lenDicRR)
+    else:
+        dataListRR = []
+    
     header, referenceFile, queryFile = optTypeFileHeader + "CR", contigFilename + "_Double.fasta" , readsetFilename + "_Double.fasta"
     if True:
-        alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
+        alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header )
+        #alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
     
     lenDicCR = dict(lenDicCC.items() + lenDicRR.items())
     dataListCR = alignerRobot.extractMumData(folderName, header + "Out")
@@ -120,7 +151,6 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     # for eachitem in dataListRR[0:10]:
     #    print eachitem , lenDicRR[eachitem[-2]], lenDicRR[eachitem[-1]]
     
-    
     addDataToList(dataListRR, G, N1, N1, 'R', 'R')
     
     addDataToList(dataListCR, G, 0, N1, 'C', 'R')
@@ -131,5 +161,6 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
     # print len(G.graphNodesList[0].listOfPrevNodes), len(G.graphNodesList[0].listOfNextNodes)
     print "len(G.graphNodesList)", len(G.graphNodesList)
+    
     
     

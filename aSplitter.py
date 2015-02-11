@@ -19,6 +19,8 @@ parser.add_argument('-l', '--large', help= 'Large number of contigs/large size o
 parser.add_argument('-rp', '--replace', help= 'Input files to aSplitter(e.g. noEmbed.fasta, improved.fasta, improved2.fasta or improved3.fasta)', required=False)
 parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estimation (input is True)', required=False)
 parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)
+parser.add_argument('-rd', '--RRDisable', help= 'Whether one should disable Read to Read overlap check (input is True)', required=False)
+
 
 args = vars(parser.parse_args())
 
@@ -58,7 +60,13 @@ if args['replace'] != None :
     replacedName = args['replace']
     abunHouseKeeper.replaceFiles( newFolderName, replacedName) 
 
-    
+if args['RRDisable'] == "True":
+    abunHouseKeeper.abunGlobalRRDisable = True
+else:
+    abunHouseKeeper.abunGlobalRRDisable = False
+
+
+
 if pathExists:
     abunSplitter.mainFlow(newFolderName, newMummerLink)
 else:
