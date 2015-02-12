@@ -8,7 +8,10 @@ abunGlobalRRDisable = False
 def replaceFiles( folderName, replacedName) :
     commandList = []
     commandList.append("cp " + folderName + "improved3.fasta " + folderName + "improved3_backup.fasta")
+    commandList.append("cp " + folderName + "improved3_Double.fasta " + folderName + "improved3_backup.fasta")
+    
     commandList.append("cp " + folderName + replacedName + " "+folderName + "improved3.fasta")
+    commandList.append("cp " + folderName + replacedName[0:-6]+"_Double.fasta " + folderName + "improved3_Double.fasta")
     
     for eachcommand in commandList:
         print eachcommand
