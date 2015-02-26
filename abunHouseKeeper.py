@@ -52,11 +52,26 @@ def filterData(dataList, lenDic):
 
     return newDataList
 
+def filterDataIdentical(dataList, lenDic):
+    newDataList = []
+    for eachitem in dataList:
+        if not identicalItem(eachitem, lenDic):
+            newDataList.append(eachitem)
+
+    return newDataList
+
+def identicalItem(eachitem, lenDic):
+    start1, end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
+    thres = 20 
+    if abs(start1-start2) < thres and abs(end1 - end2) < thres:
+        return True
+    else:
+        return False
 
 def headTailMatch(eachitem, lenDic):
     start1, end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
     l1, l2 = lenDic[eachitem[-2]], lenDic[eachitem[-1]]
-    thres = 40 
+    thres = 10 
     
     
     diffContig , forwardStrand, headtailoverlap = False, False , False

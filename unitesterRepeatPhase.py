@@ -67,10 +67,10 @@ class repeatPhaserTests(unittest.TestCase):
     
     def testASplitterParameterCheck(self):
         paraTestList = ["-rp improved2.fasta ", "-ar True ", "-rs 0 "]
-        #for eachpara in paraTestList:
-        #    self.runningParaterTestSet(eachpara,2)
+        for eachpara in paraTestList:
+            self.runningParaterTestSet(eachpara,2)
         
-        #self.runningParaterTestSet("-rd True ",2)
+        self.runningParaterTestSet("-rd True ",2)
         
     def runningParaterTestSet(self , parameter,ctexpected):
         myFolderName = "/Users/kakitlam/Desktop/metaFinisherSC/src/testdata/"
