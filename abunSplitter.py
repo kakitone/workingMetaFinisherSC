@@ -47,7 +47,7 @@ def satisfyMatch(initem ,newOutList, sd):
     targetItem = -1
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
-        if abs(outCt - inCt) < sd and inIndex != outIndex:
+        if abs(outCt - inCt) < 0.5*sd and inIndex != outIndex:
             targetItem = outIndex
             
     # Second check pt
@@ -55,7 +55,7 @@ def satisfyMatch(initem ,newOutList, sd):
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
         if outIndex != targetItem :
-            if abs(outCt - inCt) <= 1.1*sd :
+            if abs(outCt - inCt) <= 2.01*sd :
                 rejection = True
                 
     # Combined check 
@@ -127,7 +127,7 @@ def abunSplit(folderName, mummerLink, myCountDic):
         addEdges(G, resolvedList)
         
     G.condense()
-    IORobot.extractGraphToContigs(G, folderName, mummerLink)
+    IORobot.extractGraphToContigs(G, folderName, mummerLink, "abun.fasta", "improved3_Double.fasta")
     
     
 

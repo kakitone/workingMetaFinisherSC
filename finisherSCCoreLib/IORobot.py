@@ -183,17 +183,42 @@ def writeToFile(f2, runningIndex, seq):
     f2.write('\n')
 
 # ## 5) Read the contigs out (I: startList, graphNodes, ; O:improved.fasta, openZone.txt)
+
+def useAlignToGetLen(eachnode, i , nameDic, orientation, myContigsDic, readNum, folderName , mummerLink):
+    indexToAddNext = eachnode.nodeIndexList[i+1]
+    readNumNext = indexToAddNext / 2
+    orientationNext = indexToAddNext % 2 
+    
+    if len(nameDic) > 0:
+        orientationNext = nameDic[indexToAddNext]%2
+        readNumNext = nameDic[indexToAddNext]/2
+    
+    if orientation == 0:
+        leftSeg= myContigsDic['Contig' + str(readNum) + '_' + 'p']
+    else:
+        leftSeg = myContigsDic['Contig' + str(readNum) + '_' + 'd']
+    
+    if orientationNext == 0 :
+        rightSeg = myContigsDic['Contig' + str(readNumNext) + '_' + 'p']
+    else:
+        rightSeg = myContigsDic['Contig' + str(readNumNext) + '_' + 'd']
+        
+    
+    overlapInfo= align(leftSeg, rightSeg, folderName, mummerLink)
+    overlapLen = overlapInfo[0]
+    
+    return overlapLen
+
 def readContigOut(folderName, mummerLink, graphFileName, contigFile, outContigFile, outOpenList, nameDic={}):
     
     print "readContigOut"
-    print "print nameDic", nameDic
+     
     G = graphLib.seqGraph(0)
     G.loadFromFile(folderName, graphFileName)
     G.findStartEndList()
-    
+
     myContigsDic = loadContigsFromFile(folderName, contigFile)
     
-        
     contigUsed = [False for i in range(len(G.graphNodesList) / 2)]
      
     seqToPrint = []
@@ -234,10 +259,14 @@ def readContigOut(folderName, mummerLink, graphFileName, contigFile, outContigFi
                     
                     #print readNum
                     if i != len(eachnode.nodeIndexList) - 1:
-    
-                        overlapLen = eachnode.overlapList[i]
-                        print overlapLen
-    
+                          
+                        overlapLenOld = eachnode.overlapList[i]
+                        
+                        # Can we hijack here for the overlap Length... seems like minimal changes   
+                        overlapLen =  useAlignToGetLen(eachnode, i , nameDic, orientation, myContigsDic, readNum, folderName , mummerLink)
+                        # End Hijacking 
+                        print overlapLen, overlapLenOld
+                        
                         if orientation == 0:
                             tmpSeq = tmpSeq + myContigsDic['Contig' + str(readNum) + '_' + 'p'][0:-overlapLen]
                         else:
@@ -257,7 +286,8 @@ def readContigOut(folderName, mummerLink, graphFileName, contigFile, outContigFi
                 
 
                 seqToPrint.append(tmpSeq)
-    
+
+
     print "No forward/reverse mismatch ?", noForRevMismatch
     fImproved = open(folderName + outContigFile, 'w')
     for eachcontig, dummyIndex in zip(seqToPrint, range(len(seqToPrint))):
@@ -452,8 +482,11 @@ def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K)
 
 ### read from overlap
 
-def writeSegOut(ctgList, folderName):
-    f = open(folderName + "abun.fasta", 'w')
+
+
+
+def writeSegOut(ctgList, folderName, fileout):
+    f = open(folderName + fileout, 'w')
     
     for i in range(len(ctgList)):
         f.write(">Segkk" + str(i) +'\n')
@@ -471,7 +504,7 @@ def checkIncluded(tmp, markedList):
 
 
 def align(leftSeg, rightSeg, folderName, mummerLink):
-    overlap = 0 
+    overlap = [0, 0 ] 
     lLen = 0
     f = open(folderName + "leftSeg.fasta", 'w')
     f.write(">SegL\n")
@@ -503,29 +536,42 @@ def align(leftSeg, rightSeg, folderName, mummerLink):
     
     thres = 10
     
+    
     if len(dataList) == 0:
-        overlap = 0
+        overlap = [0, 0 ]
     else:
-        myMax = -1
+        myMax = [0, 0]
+        
         for eachitem in dataList:
             if eachitem[1] > lLen - thres and eachitem[2] < thres:
-                if eachitem[5] > myMax:
-                    myMax = eachitem[5]
+                if eachitem[5] > myMax[1]:
+                    myMax[0] = eachitem[4]
+                    myMax[1] = eachitem[5]
         
         overlap = myMax 
-                
     
     return overlap 
     
    
 def joinSeg(tmp, folderName, segLookUp, mummerLink):
     ctg = segLookUp[tmp[0]]
+    tmpList = []
     
     for i in range(len(tmp)-1):
-        overlap = align(segLookUp[tmp[i]], segLookUp[tmp[i+1]], folderName, mummerLink)
-        ctg = ctg + segLookUp[tmp[i+1]][overlap:]
+        overlapArr = align(segLookUp[tmp[i]], segLookUp[tmp[i+1]], folderName, mummerLink)
+        overlap = overlapArr[1]
+         
+
+        print "overlap : ", overlap
+        if overlap >= 0 :
+            ctg = ctg + segLookUp[tmp[i+1]][overlap:]
+        else:
+            tmpList.append(ctg)
+            ctg = segLookUp[tmp[i+1]]
+
+    tmpList.append(ctg)
         
-    return ctg
+    return tmpList
 
 def readContigsFromFile(folderName, filename):
     segLookUp = [] 
@@ -548,11 +594,11 @@ def readContigsFromFile(folderName, filename):
     f.close()
     return segLookUp
 
-def extractGraphToContigs(G, folderName, mummerLink):
+def extractGraphToContigs(G, folderName, mummerLink, fileout, filein):
     N1 = len(G.graphNodesList)
     markedList = [False for i in range(N1/2)]
     
-    segLookUp = readContigsFromFile(folderName, "improved3_Double.fasta")
+    segLookUp = readContigsFromFile(folderName, filein)
     
     ctgList = []
     for eachnode in G.graphNodesList:
@@ -562,8 +608,9 @@ def extractGraphToContigs(G, folderName, mummerLink):
             for eachitem in tmp: 
                 markedList[eachitem/2] = True
             if not isIncluded :
-                ctg = joinSeg(tmp, folderName, segLookUp, mummerLink)
-                ctgList.append(ctg)
+                ctgtmpList = joinSeg(tmp, folderName, segLookUp, mummerLink)
+                ctgList = ctgList + ctgtmpList
+                
     
-    writeSegOut(ctgList, folderName)
+    writeSegOut(ctgList, folderName, fileout)
             

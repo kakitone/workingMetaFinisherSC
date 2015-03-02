@@ -29,14 +29,18 @@ class repeatPhaserTests(unittest.TestCase):
         
         commandList.append("python xPhaser.py " + self.testingFolder + " " + self.mummerPath )
         
+        
         self.listOfFiles.append("improved3.fasta")
         self.listOfFiles.append("relatedReads.fasta")
+        self.listOfFiles.append("raw_reads.part-*")
+        
         matchingContigFile = "improved4.fasta"
-        #self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
         
         self.listOfFiles.pop()
         self.listOfFiles.pop()
-    
+        self.listOfFiles.pop()
+        
     def testTSolver(self):
         print "Integration test TSolver"
         # tandemRepeatSolver.py as starting point
@@ -44,12 +48,12 @@ class repeatPhaserTests(unittest.TestCase):
         ctexpected = 1
         commandList = []
         
-        commandList.append("python finisherSCCoreLib/finisherSC.py "+ self.testingFolder +" " + self.mummerPath)
+        commandList.append("python finisherSCCoreLib/finisherSC.py -par 4 "+ self.testingFolder +" " + self.mummerPath)
         commandList.append("python tSolver.py " + self.testingFolder + " " + self.mummerPath )
         
         matchingContigFile = "tademResolved.fasta"
         
-        #self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
+        self.runningTestSet(myFolderName, ctexpected, commandList, matchingContigFile)
         
         
     def testASplitter(self):

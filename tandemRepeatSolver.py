@@ -238,7 +238,7 @@ def resolvingTandem(folderName, mummerPath, contigReadGraph,contigFilename, read
         c = findCoverageFromRawData(folderName)
         
         
-        print "dataList[0]", dataList[0]
+        # print "dataList[0]", dataList[0]
         dataList.sort(key = itemgetter(-1))
         for key, values in  groupby(dataList,itemgetter(-1)):
             maxValue = -1

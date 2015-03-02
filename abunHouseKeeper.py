@@ -63,7 +63,11 @@ def filterDataIdentical(dataList, lenDic):
 def identicalItem(eachitem, lenDic):
     start1, end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
     thres = 20 
-    if abs(start1-start2) < thres and abs(end1 - end2) < thres:
+    
+    endPt1 = lenDic[eachitem[-2]] - end1
+    endPt2 = lenDic[eachitem[-1]] - end2
+    
+    if abs(start1-start2) < thres and abs(endPt1 - endPt2) < thres:
         return True
     else:
         return False
