@@ -637,7 +637,7 @@ def breakSC(folderName, mummerLink):
             
     IORobot.writeSegOut(brokenContigList, folderName, "SC_n.fasta")
      
-    
+
 def fixSCMisassembly(folderName , mummerLink):
     print "fixSCMisassembly"
     

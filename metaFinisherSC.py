@@ -1,3 +1,1 @@
-from misassemblyFixerLib import merger
-
-print "dd"
+print "This is a starting point of MetaFinisherSC"
