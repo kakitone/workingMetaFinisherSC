@@ -580,7 +580,7 @@ def mainFlow(folderName, mummerLink):
     if False:
         myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
         
-    if True :
+    if False :
         splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
     
         

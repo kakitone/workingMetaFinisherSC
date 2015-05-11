@@ -50,6 +50,20 @@ class abunSplitParameterRobot():
         self.AbunLowerX = -1
         self.AbunUpperX = -1
 
+    def loadData(self, initial_data):
+        canLoad = True
+        for key in initial_data:
+            if hasattr(self, key):
+                if initial_data[key] =='True' :
+                    setattr(self, key, True)
+                elif initial_data[key] == 'False':
+                    setattr(self, key, False)
+                else:
+                    setattr(self, key, float(initial_data[key]))
+            else:
+                canLoad = False
+        return canLoad
+
   
 abunGlobalSplitParameterRobot = abunSplitParameterRobot()
 

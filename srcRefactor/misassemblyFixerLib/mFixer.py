@@ -67,9 +67,5 @@ elif merger.mergerGlobalLCReads == "LR":
 
     
     
-    
-    
-    
-    
 print  "Time", time.time() - t0
 

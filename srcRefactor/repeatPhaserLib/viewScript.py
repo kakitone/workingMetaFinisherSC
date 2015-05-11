@@ -16,6 +16,11 @@ import abunSplitter
 import argparse
 import os
 
+import time
+import datetime
+import re
+
+
 def test1():
 	lenDic = {}
 	coverageDic = {}
@@ -345,11 +350,11 @@ def continuousIntegration():
 def multipleTesting(folderName, mummerLink, option):
 	print "Experiments : "
 		
-	header = "/data/kakitone/Mar20-2015/MetaFinisherSC/"
+	header = "/data/kakitone/May07-2015/workingMetaFinisherSC/"
 
 	os.system("mkdir "+ header + folderName )
 	
-	#os.system("cp "+header+"Apr10Test/*  "  + header + folderName )
+	os.system("cp "+header+"Apr10Test/*  "  + header + folderName )
 
 	if option == "1":
 		abunHouseKeeper.abunGlobalSplitParameterRobot.runGraphSurgery = True
@@ -386,10 +391,70 @@ def multipleTesting(folderName, mummerLink, option):
 
 	abunSplitter.mainFlow(folderName, mummerLink)
 
-	os.system("python /data/kakitone/download2/quast-2.3/quast.py " + header + folderName +"abun.fasta" + "  -R  "+ header + folderName + "reference.fasta")
+	os.system("python /data/kakitone/download2/quast-2.3/quast.py " + header + folderName +"abun.fasta -o " + header + folderName + "   -R  "+ header + folderName + "reference.fasta")
 
 def testingsymmetry():
 	print "Hello world"
+
+def loggHeaders():
+	folderName, filename= "/data/kakitone/May07-2015/workingMetaFinisherSC/", "results.csv"
+
+	myDic =  abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+	f = open(folderName + filename , 'a')
+	tmpString  = ""
+	st = "time"
+	
+	tmpString = tmpString + str(st) + ","
+
+	for eachitem in myDic:
+		tmpString = tmpString + eachitem + ","
+
+	tmpString = tmpString  + "misassembly" + "," + "ncontig"+ "\n"
+
+	f.write(tmpString)
+	f.close()
+
+
+def loggResults():
+	folderName, filename= "/data/kakitone/May07-2015/workingMetaFinisherSC/", "results.csv"
+	print "Logging results "
+
+	myDic =  abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+	f = open(folderName + filename , 'a')
+	tmpString  = ""
+	st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d~%H:%M:%S')
+	
+	tmpString = tmpString + str(st) + ","
+
+	for eachitem in myDic:
+		tmpString = tmpString + str(myDic[eachitem]) + ","
+	
+	# Use regex to get misassemby and Ncontig here
+	quastReport = folderName + "quast_results/latest/report.txt"
+	
+	regex = re.compile("misassemblies*")
+
+	misassembly = str(1997)
+	ncontig = str(1997) 
+	
+	with open(quastReport) as f2:
+	    for line in f2:
+	        result = re.match("# misassemblies (.*?) .*", line)
+	        if result != None: 
+		        ans = result.group(0).split()
+		        misassembly = ans[2]
+	        
+	        result = re.match("# contigs \(>= 0 bp\) (.*?) .*", line)
+	        if result != None: 
+		        ans = result.group(0).split()
+		        ncontig=ans[-1]
+
+	
+	tmpString = tmpString  + misassembly + "," + ncontig+ "\n"
+
+	f.write(tmpString)
+
+	f.close()
 
 	
 #mapStrangePairs()
@@ -403,7 +468,9 @@ def testingsymmetry():
 
 #continuousIntegration() 
 
-if True:
+loggResults()
+
+if False:
 	parser = argparse.ArgumentParser(description='aSplitter')
 
 	parser.add_argument('folderName')
