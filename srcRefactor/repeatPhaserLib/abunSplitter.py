@@ -571,16 +571,16 @@ def mainFlow(folderName, mummerLink):
     optionToRun = "xphase"
     
         
-    if False:
+    if abunHouseKeeper.abunGlobalRunPickUp == "map" :
         associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
         readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph )
         repeatFinder.identifyRepeat(folderName, mummerLink,contigFilename,contigReadGraph, repeatFilename, optionToRun )
         
     
-    if False:
+    if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" :
         myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
         
-    if False :
+    if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" or abunHouseKeeper.abunGlobalRunPickUp == "split" :
         splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
     
         

@@ -22,6 +22,8 @@ parser.add_argument('-rp', '--replace', help= 'Input files to aSplitter(e.g. noE
 parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estimation (input is True)', required=False)
 parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)
 parser.add_argument('-rd', '--RRDisable', help= 'Whether one should disable Read to Read overlap check (input is True)', required=False)
+parser.add_argument('-pk', '--pickup', help= 'where to run ASplitter, map/count/split', required=False)
+
 
 parser.add_argument('-op', '--option', help='File of parameter list (input is opa=true opb=false)', required=False)
 
@@ -67,6 +69,10 @@ if args['RRDisable'] == "True":
     abunHouseKeeper.abunGlobalRRDisable = True
 else:
     abunHouseKeeper.abunGlobalRRDisable = False
+
+
+if args['pickup'] in [ "map", "count", "split"] :
+    abunHouseKeeper.abunGlobalRunPickUp = args['pickup']
 
 
 if args['option'] != None:

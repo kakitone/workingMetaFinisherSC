@@ -5,7 +5,7 @@ from finisherSCCoreLib import IORobot
 abunGlobalAvoidrefine = False
 abunGlobalReadSearchDepth = 1
 abunGlobalRRDisable = False
-
+abunGlobalRunPickUp = "map"
 
 class abunSplitParameterRobot():
     def __init__(self):

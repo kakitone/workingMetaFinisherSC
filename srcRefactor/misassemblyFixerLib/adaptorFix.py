@@ -99,4 +99,4 @@ def fixAdaptorSkip(folderName, mummerLink, inputFileName):
     if True:
         nonRedundantResolver.removeEmbedded(folderName , mummerLink)
 
-fixAdaptorSkip("dataFolder/", "/usr/bin/", "debug.fasta") 
+#fixAdaptorSkip("dataFolder/", "/usr/bin/", "debug.fasta") 

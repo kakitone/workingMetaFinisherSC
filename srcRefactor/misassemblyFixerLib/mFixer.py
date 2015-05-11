@@ -13,6 +13,7 @@ parser.add_argument('folderName')
 parser.add_argument('mummerLink')
 parser.add_argument('-par', '--parallel', help= 'Fast aligns contigs (input is maximum number of threads)', required=False)
 parser.add_argument('-t', '--LCReads', help= 'Type of reads aligned to the contigs formed by long reads', required=False)
+parser.add_argument('-op', '--option', help= 'Parameters to pass in', required=False)
 
 
 

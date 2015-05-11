@@ -7,6 +7,12 @@ import bisect
 
 mergerGlobalLCReads = "SR"
 
+class fixerRobot:
+    def __init__(self):
+        print "fixerRobot"
+
+mergerGlobalFixerRobot = fixerRobot()
+
 
 import os 
 import random 
