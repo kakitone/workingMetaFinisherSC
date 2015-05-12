@@ -76,6 +76,14 @@ def replaceFiles( folderName, replacedName) :
     IORobot.writeToFile_Double1(folderName, replacedName[0:-6]+".fasta", replacedName[0:-6]+"_Double.fasta", "contig")
     
     commandList.append("cp " + folderName + replacedName + " "+folderName + "improved3.fasta")
+    
+    command = "perl -pe 's/>[^\$]*$/\">Segkk\" . ++$n .\"\n\"/ge' "+folderName+"improved3.fasta > "+folderName+"newImproved3.fasta "
+    commandList.append(command)
+    
+    command = "cp " +folderName+"newImproved3.fasta  "+folderName+"improved3.fasta "
+    commandList.append(command)
+
+
     commandList.append("cp " + folderName + replacedName[0:-6]+"_Double.fasta " + folderName + "improved3_Double.fasta")
     
     for eachcommand in commandList:
