@@ -2,17 +2,17 @@
 
 python -m srcRefactor.misassemblyFixerLib.mFixer \
 -t LR  -par 20  \
--op "toRunAdaptor=True myname=chriswong"\
-Apr10TestB/ /usr/bin/
+-op "toRunAdaptor=True" \
+May11TestA/ /usr/bin/
 
 
-2) Run ASplitter with options [V Good]
+2) Run ASplitter with options
 
 nohup python -m srcRefactor.repeatPhaserLib.aSplitter \
--par 20 -rp LC_n.fasta -ar True -rs 0 -rd True \
+-par 20 -rp mFixed.fasta -ar True -rs 0 -rd True \
 -op  "BRThres=2 RThres=5" \
--pk count \
-Apr10TestB/ /usr/bin/ &
+-pk map \
+May11TestA/ /usr/bin/ &
 
 
 
@@ -20,13 +20,13 @@ Apr10TestB/ /usr/bin/ &
 
 python -m srcRefactor.evaluator --option header \
 --quastPath /data/kakitone/download2/quast-2.3/quast.py \
---folderName /data/kakitone/May07-2015/workingMetaFinisherSC/Apr10TestB/ \
+--folderName /data/kakitone/May07-2015/workingMetaFinisherSC/May11TestA/ \
 --paraFileName option.json \
 --outputFilename /data/kakitone/May07-2015/workingMetaFinisherSC/results.csv 
 
 
 python -m srcRefactor.evaluator --option evaluate \
 --quastPath /data/kakitone/download2/quast-2.3/quast.py \
---folderName /data/kakitone/May07-2015/workingMetaFinisherSC/Apr10TestB/ \
+--folderName /data/kakitone/May07-2015/workingMetaFinisherSC/May11TestA/ \
 --paraFileName option.json \
 --outputFilename /data/kakitone/May07-2015/workingMetaFinisherSC/results.csv 

@@ -8,13 +8,13 @@ from operator import itemgetter
 import merger
 import os 
 
-def fixAdaptorSkip(folderName, mummerLink, inputFileName):
+def fixAdaptorSkip(folderName, mummerLink, inputFileName, outputFileName):
     print "fixAdaptorSkip"
     thres = 5000
     delta = 5000 
     largeThres = 5000
     
-    if False:
+    if True:
         outputName, referenceName, queryName =  "adaptorCk", inputFileName, inputFileName
         command = mummerLink + "nucmer  -p " + folderName + outputName + " " + folderName + referenceName + " " + folderName + queryName
         os.system(command)
@@ -91,12 +91,15 @@ def fixAdaptorSkip(folderName, mummerLink, inputFileName):
         else:
             returnContigList = returnContigList + [contigDic[eachitem]]
                             
-    IORobot.writeSegOut(returnContigList, folderName, "clearedAdaptor_"+inputFileName)
+    IORobot.writeSegOut(returnContigList, folderName, "clearedAdaptor.fasta")
     
+    '''
     os.system("cp " + folderName + "contigs.fasta " + folderName + "contigsbackup.fasta")
     os.system("cp " + folderName + "clearedAdaptor_"+inputFileName + " " + \
               folderName + "contigs.fasta")
+    
+    '''
     if True:
-        nonRedundantResolver.removeEmbedded(folderName , mummerLink)
+        nonRedundantResolver.removeRedundantWithFile(folderName , mummerLink, "clearedAdaptor", "clearedAdaptorRedundant",outputFileName )
 
-#fixAdaptorSkip("dataFolder/", "/usr/bin/", "debug.fasta") 
+

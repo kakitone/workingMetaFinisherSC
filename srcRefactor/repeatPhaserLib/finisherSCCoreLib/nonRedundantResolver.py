@@ -7,21 +7,25 @@ import houseKeeper
 
 def removeEmbedded(folderName , mummerLink):
     print "removeEmbedded"
-    thres = 10
-    os.system("sed -e 's/|//g' " + folderName + "contigs.fasta  > " + folderName + "contigs2.fasta")
+    removeRedundantWithFile(folderName , mummerLink, "contigs", "self", "noEmbed")
 
-    os.system("cp " + folderName + "contigs2.fasta " + folderName + "contigs.fasta") 
+
+def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpName, outputFileName):
+    thres = 10
+    os.system("sed -e 's/|//g' " + folderName + inputFilename+".fasta  > " + folderName + inputFilename+ "2.fasta")
+
+    os.system("cp " + folderName + inputFilename+"2.fasta " + folderName + inputFilename+".fasta") 
 
     if True:
-        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self", "contigs.fasta", "contigs.fasta", ""]], houseKeeper.globalParallel )
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[mummerTmpName, inputFilename+".fasta", inputFilename+".fasta", ""]], houseKeeper.globalParallel )
         # alignerRobot.useMummerAlign(mummerLink, folderName, "self", "contigs.fasta", "contigs.fasta")
         # outputName, referenceName, queryName, specialName
     
-    dataList = alignerRobot.extractMumData(folderName, "selfOut")
+    dataList = alignerRobot.extractMumData(folderName, mummerTmpName+ "Out")
     
     dataList = alignerRobot.transformCoor(dataList)
     
-    lenDic = IORobot.obtainLength(folderName, 'contigs.fasta')
+    lenDic = IORobot.obtainLength(folderName, inputFilename+'.fasta')
     
     removeList = []
     for eachitem in dataList:
@@ -39,7 +43,7 @@ def removeEmbedded(folderName , mummerLink):
                 
     nameList = obtainComplement(lenDic, removeList)
     
-    IORobot.putListToFileO(folderName, "contigs.fasta", "noEmbed", nameList)
+    IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, nameList)
 
 
 def obtainComplement(lenDic, removeList):
