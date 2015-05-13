@@ -12,6 +12,7 @@ from finisherSCCoreLib import alignerRobot
 from finisherSCCoreLib import graphLib
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import houseKeeper
+from finisherSCCoreLib import nonRedundantResolver 
 
 import associatedReadFinder
 import readContigGraphFormer
@@ -1046,14 +1047,16 @@ def readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilena
         gapContentLookUpDic[str(eachitem[0]) +"_" +str(eachitem[1])] = [ eachitem[2],eachitem[3],eachitem[4] ]
         print eachitem[2:4], len(eachitem[4])
     
-    segLookUp = IORobot.readContigsFromFile(folderName, "LC_n_Double.fasta")
+    #segLookUp = IORobot.readContigsFromFile(folderName, "LC_n_Double.fasta")
     
     print "Final step: really hacking a file"
     os.system("cp "+ folderName + contigFilename+"_Double.fasta " +folderName + "tmpWithDummy.fasta")
     contigList = IORobot.readContigsFromFile(folderName,  contigFilename+"_Double.fasta")
     
-    IORobot.extractGraphToContigs(G, folderName, mummerLink, "abun.fasta", "tmpWithDummy.fasta", gapContentLookUpDic, mapDummyToRealDic)
-        
+    IORobot.extractGraphToContigs(G, folderName, mummerLink, "abunPre.fasta", "tmpWithDummy.fasta", gapContentLookUpDic, mapDummyToRealDic)
+
+    if True:
+        nonRedundantResolver.removeRedundantWithFile(folderName , mummerLink, "abunPre", "abunMum", "abun")
 
 def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
 

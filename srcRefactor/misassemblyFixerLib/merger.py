@@ -790,7 +790,7 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
         breakLC(folderName, inputName)
         blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
     else:
-        blkDic = breakPtGettingHack(folderName, newDataList, inputName)
+        blkDic = breakPtGettingHack2(folderName, newDataList, inputName)
 
 
     LCList = IORobot.loadContigsFromFile(folderName, inputName+".fasta")
@@ -868,8 +868,10 @@ def breakPtGettingHack(folderName, dataList, inputLCname):
     for key, items in groupby(dataList,itemgetter(-2) ):
         contigName = key
         newList =[]
+
         for eachitem in items:
             newList.append([eachitem[0], eachitem[1]])
+
         newList.sort()
 
         bktmp = [0]
@@ -889,6 +891,49 @@ def breakPtGettingHack(folderName, dataList, inputLCname):
         #print "breakPtsDic[contigName]",breakPtsDic[contigName]
 
     return blkDic
+
+
+def breakPtGettingHack2(folderName, dataList, inputLCname):
+    
+    blkDic = {}
+    dataList.sort(key = itemgetter(-2))
+    lenDic = IORobot.obtainLength(folderName, inputLCname+".fasta") 
+    g = 1000
+
+    for key, items in groupby(dataList,itemgetter(-2) ):
+        contigName = key
+        newList =[]
+
+        for eachitem in items:
+            newList.append([eachitem[0], eachitem[1]])
+            
+        newList.sort()
+        
+        bktmp = [0]
+
+        if newList[0][0] > g :
+            bktmp.append(newList[0][0])
+            bktmp.append(newList[0][1])
+            
+        minThres = newList[0][1] + g
+
+        for i in range(len(newList)-1):
+            if newList[i+1][0] > minThres:
+                bktmp.append(newList[i+1][0])
+                bktmp.append(newList[i+1][1])
+
+            if newList[i+1][1] + g > minThres: 
+                minThres = newList[i+1][1] + g
+
+        bktmp.append(lenDic[contigName])
+
+        blkDic[contigName] = bktmp
+        print "contigName: "+ contigName
+        print "bktmp:", bktmp
+        #print "breakPtsDic[contigName]",breakPtsDic[contigName]
+
+    return blkDic
+
 
 def mainFlow(newFolderName, newMummerLink):
 

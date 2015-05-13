@@ -5,6 +5,68 @@ import houseKeeper
 
 # ## 0) Preprocess by removing embedded contigs (I: contigs.fasta ; O : noEmbed.fasta)
 
+### Disjoint Union Data Structure
+class clusterElem(object):
+    def __init__(self,index):
+        self.rank = 0
+        self.parent = self
+        self.id = index
+        self.childList =[]
+        
+        #self.size = 1
+
+def find(x):
+    #if x != x.parent:
+    #    x.parent = find(x.parent)
+    #return x.parent
+    if x.parent == x:
+        return x
+    else:
+        return find(x.parent)
+       
+def union(x,y):
+    xRoot = find(x)
+    yRoot = find(y)
+    
+    if xRoot == yRoot:
+        return 0
+    
+    if xRoot.rank < yRoot.rank:
+        xRoot.parent = yRoot
+        yRoot.childList.append(xRoot)
+        
+        
+    elif xRoot.rank > yRoot.rank:
+        yRoot.parent = xRoot
+        xRoot.childList.append(yRoot)
+        
+        
+    else:
+        yRoot.parent = xRoot
+        xRoot.childList.append(yRoot)
+        
+        xRoot.rank = xRoot.rank + 1 
+        
+    return 1
+
+def familyList(x):
+    root = find(x)
+    stack = []
+    familyKmers = [root]
+    
+    stack.append(root)
+    while (len(stack) >0 ):
+        item = stack.pop(0)
+        for eachsubitem in item.childList:
+            familyKmers.append(eachsubitem)
+            stack.append(eachsubitem)
+            
+    return familyKmers
+                    
+
+
+
+
 def removeEmbedded(folderName , mummerLink):
     print "removeEmbedded"
     removeRedundantWithFile(folderName , mummerLink, "contigs", "self", "noEmbed")
@@ -28,6 +90,13 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
     lenDic = IORobot.obtainLength(folderName, inputFilename+'.fasta')
     
     removeList = []
+
+    shortEmbedClusterDic = {}
+
+    for eachitem in lenDic:
+        shortEmbedClusterDic[eachitem]= clusterElem(eachitem)
+
+
     for eachitem in dataList:
         match1, match2, name1, name2 = eachitem[4], eachitem[5], eachitem[7], eachitem[8]
         
@@ -40,10 +109,20 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
                 removeList.append(name2)
             elif abs(l1 - match1) < thres and abs(l2 - match2) < thres:
                 print "Both shortembedd", eachitem
-                
+                union(shortEmbedClusterDic[name1], shortEmbedClusterDic[name2])
+
+        
     nameList = obtainComplement(lenDic, removeList)
     
-    IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, nameList)
+    returnList = []
+
+    for eachitem in nameList:
+        if find(shortEmbedClusterDic[eachitem]).id == eachitem:
+            returnList.append(eachitem)
+
+    print "len(nameList), len(returnList)", len(nameList), len(returnList)
+
+    IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, returnList)
 
 
 def obtainComplement(lenDic, removeList):

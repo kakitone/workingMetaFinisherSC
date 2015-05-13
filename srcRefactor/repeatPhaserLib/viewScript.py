@@ -238,7 +238,7 @@ def continuousIntegration():
 		toDelete = abunGraphLib.decideCut("Apr10Test/", "/usr/bin/")
 		print toDelete
 
-	if True:
+	if False:
 		G = graphLib.seqGraph(0)
 		G.loadFromFile("Apr10TestA/", "xResolvedGraph")
 
@@ -342,6 +342,8 @@ def continuousIntegration():
 		print "count2, ", count2
 
 		### End filter adaptor skipped case 
+	if True:
+		nonRedundantResolver.removeRedundantWithFile("May11TestB/" , "/usr/bin/", "abun", "abunDebug", "abunNoEmbed")
 
 
 
@@ -466,9 +468,9 @@ def loggResults():
 
 #mapStrangePairs()
 
-#continuousIntegration() 
+continuousIntegration() 
 
-loggResults()
+#loggResults()
 
 if False:
 	parser = argparse.ArgumentParser(description='aSplitter')
