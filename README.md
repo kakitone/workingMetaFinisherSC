@@ -34,7 +34,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         cd dataFolder
         
-        wget -O testData.zip 
+        wget -O testData.zip http://www.eecs.berkeley.edu/~kakitone/testData.zip 
         
         unzip testData.zip
         
@@ -61,15 +61,36 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         show-coords out.delta
 
-6. You should now see , which suggests that the abun.fasta correctly matches with the ground truth. 
+        |   [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] 
+        |=====================================================================================
+        | 2500006  2512005  |  2500001  2512000  |    12000    12000  |   100.00  | Segkk1	Segkk0
+        |       1  5000002  |  5000000        1  |  5000002  5000000  |    99.99  | Segkk0	Segkk0
+        |       1  5000005  |        1  5000000  |  5000005  5000000  |    99.99  | Segkk1	Segkk1
+        | 2488001  2500002  |  2512000  2500001  |    12002    12000  |    99.83  | Segkk0	Segkk1
 
-       
-
-
-7. As a check, you may also want to see that the original contigs are misassembled. This can be seen by 
+6. As a check, you may also want to see that the original contigs are misassembled. This can be seen by 
 
         nucmer  -maxmatch dataFolder/LC.fasta dataFolder/reference.fasta         
 
         show-coords out.delta
 
+        |    [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS]
+        |=====================================================================================
+        |       1  2512000  |        1  2512000  |  2512000  2512000  |   100.00  | Segkk0	Segkk0
+        | 2500001  5000000  |  2500001  5000000  |  2500000  2500000  |   100.00  | Segkk1	Segkk0
+        |       1  2512000  |        1  2512000  |  2512000  2512000  |   100.00  | Segkk1	Segkk1
+        | 2500001  5000000  |  2500001  5000000  |  2500000  2500000  |   100.00  | Segkk0	Segkk1
+
+7. Also, you may also want to check that there is really a common segment of length 12000 across species
+
+        nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
+
+        show-coords out.delta
+        
+        |    [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS]
+        |=====================================================================================
+        |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk0	Segkk0
+        | 2500001  2512000  |  2500001  2512000  |    12000    12000  |   100.00  | Segkk1	Segkk0
+        |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk1	Segkk1
+        | 2500001  2512000  |  2500001  2512000  |    12000    12000  |   100.00  | Segkk0	Segkk1
 
