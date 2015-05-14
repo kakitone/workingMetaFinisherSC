@@ -61,15 +61,17 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         show-coords out.delta
 
-6. You should now see , which suggests that the abun.fasta correctly matches with the ground truth. 
-
-       
 
 
-7. As a check, you may also want to see that the original contigs are misassembled. This can be seen by 
+6. As a check, you may also want to see that the original contigs are misassembled. This can be seen by 
 
         nucmer  -maxmatch dataFolder/LC.fasta dataFolder/reference.fasta         
 
         show-coords out.delta
 
 
+7. Also, you may also want to check that there is really a common segment of length 12000 across species
+
+        nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
+
+        show-coords out.delta
