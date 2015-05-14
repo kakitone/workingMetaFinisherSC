@@ -34,7 +34,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         cd dataFolder
         
-        wget -O http://www.eecs.berkeley.edu/~kakitone/testData.zip 
+        wget -O testData.zip http://www.eecs.berkeley.edu/~kakitone/testData.zip 
         
         unzip testData.zip
         
