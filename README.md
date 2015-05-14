@@ -20,7 +20,7 @@ In order to do that, here are the steps.
         python -m srcRefactor.repeatPhaserLib.aSplitter destinedFolder mummerPath
 
 ### Example ###
-Below is a step by step example on running MetaFinisherSC on the testset provided(for simplicity we use the only long read mode here). 
+Below is a step by step example on running MetaFinisherSC on the testset provided. In this example, there are two misassembled contigs and we will fix the misassemblies and join them back correctly. The reads are synthetic reads extracted from two synthetic species of different abundances(20X and 50X respectively). Both species share a common segment of length 12000 bp and that the readlength is 6000bp.  
 
 1. Clone MetaFinisherSC
         
@@ -34,9 +34,9 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         cd dataFolder
         
-        wget -O testset.zip  https://www.dropbox.com/sh/slahcgv55037aiv/AAAzkaP6HILdBlH2G_xapKYHa?dl=1
+        wget -O testData.zip 
         
-        unzip testset.zip
+        unzip testData.zip
         
         ls -lt
 
@@ -44,13 +44,11 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         cd ../
 
-        python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR dataFolder/ /usr/bin/
+        python -m srcRefactor.misassemblyFixerLib.mFixer dataFolder/ /usr/bin/
         
-        python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20  dataFolder/ /usr/bin/
-        
-        python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta -ar True -rs 0 -rd True dataFolder/ /usr/bin/
+        python -m srcRefactor.repeatPhaserLib.aSplitter  dataFolder/ /usr/bin/
 
-4. Now verify that the original LC.fasta contain 4 contigs whereas the final abun.fasta contains 2 contigs
+4. Now verify that the original LC.fasta contain 2 contigs whereas the final abun.fasta contains 2 contigs
 
         fgrep -o ">" dataFolder/LC.fasta  | wc -lc
         
@@ -63,31 +61,15 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         show-coords out.delta
 
-6. You should now see 
+6. You should now see , which suggests that the abun.fasta correctly matches with the ground truth. 
 
-        NUCMER
-        
-        |[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] |
-        |---------------|--------------------|--------------------|-----------|--------|
-        |       1  4999997  |  4999999        1  |  4999997  4999999  |    99.99  | Segkk0	Segkk0|
-        | 2490000  2500003  |  2510000  2500001  |    10004    10000  |    99.59  | Segkk1	Segkk0|
-        |       1  5000004  |  4999999        1  |  5000004  4999999  |    99.99  | Segkk1	Segkk1|
-        | 2490000  2499997  |  2510000  2500001  |     9998    10000  |    99.29  | Segkk0	Segkk1|
+       
 
 
-7. As a check, you may also want to see that there is really a 10K long repeat in the reference across the species. This can be seen by 
+7. As a check, you may also want to see that the original contigs are misassembled. This can be seen by 
 
-        nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
+        nucmer  -maxmatch dataFolder/LC.fasta dataFolder/reference.fasta         
 
         show-coords out.delta
 
 
-
-        NUCMER
-        
-        |[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] |
-        |---------------|--------------------|--------------------|-----------|--------|
-        |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk0	Segkk0|
-        | 2500001  2510000  |  2500001  2510000  |    10000    10000  |   100.00  | Segkk1	Segkk0|
-        |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk1	Segkk1|
-        | 2500001  2510000  |  2500001  2510000  |    10000    10000  |   100.00  | Segkk0	Segkk1|
