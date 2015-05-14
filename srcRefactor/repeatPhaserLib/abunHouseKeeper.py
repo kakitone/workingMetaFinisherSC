@@ -19,7 +19,7 @@ class abunSplitParameterRobot():
 
         self.BRThres = 2
         self.AbunLower = 0.5
-        self.AbunUpper = 2.01
+        self.AbunUpper = 1.95
 
         self.avoidrefine = abunGlobalAvoidrefine
         self.readSearchDepth = abunGlobalReadSearchDepth
@@ -85,7 +85,7 @@ def replaceFiles( folderName, replacedName) :
     
     commandList.append("cp " + folderName + replacedName + " "+folderName + "improved3.fasta")
     
-    command = "perl -pe 's/>[^\$]*$/\">Segkk\" . ++$n .\"\n\"/ge' "+folderName+"improved3.fasta > "+folderName+"newImproved3.fasta "
+    command = "perl -pe 's/>[^\$]*$/\">Segkk\" . $n++ .\"\n\"/ge' "+folderName+"improved3.fasta > "+folderName+"newImproved3.fasta "
     commandList.append(command)
     
     command = "cp " +folderName+"newImproved3.fasta  "+folderName+"improved3.fasta "

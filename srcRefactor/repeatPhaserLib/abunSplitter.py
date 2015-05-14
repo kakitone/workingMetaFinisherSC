@@ -1111,6 +1111,8 @@ def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
             sizeList.append(myCountDic[eachitem])
             
         sd = np.std(sizeList)
+
+        print "SD: " , sd
         
         for eachIn in inListCt:
             matchedOut = satisfyMatch(eachIn , outListCt, sd) 
