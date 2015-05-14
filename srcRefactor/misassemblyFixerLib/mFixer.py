@@ -22,11 +22,11 @@ args = vars(parser.parse_args())
 if args['parallel'] != None:
     houseKeeper.globalParallel = int(args['parallel'])
 else:
-    houseKeeper.globalParallel = 1
+    houseKeeper.globalParallel = 20
 
 
 if args['LCReads'] == None:
-    merger.mergerGlobalLCReads = "SR"
+    merger.mergerGlobalLCReads = "LR"
 elif args['LCReads'] == "LR":
     merger.mergerGlobalLCReads = "LR"
 elif args['LCReads'] == "SR":

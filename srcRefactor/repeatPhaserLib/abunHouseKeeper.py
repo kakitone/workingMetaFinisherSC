@@ -2,9 +2,9 @@ from itertools import groupby
 import os 
 from finisherSCCoreLib import IORobot
 
-abunGlobalAvoidrefine = False
-abunGlobalReadSearchDepth = 1
-abunGlobalRRDisable = False
+abunGlobalAvoidrefine = True
+abunGlobalReadSearchDepth = 0
+abunGlobalRRDisable = True
 abunGlobalRunPickUp = "map"
 
 class abunSplitParameterRobot():
@@ -17,9 +17,13 @@ class abunSplitParameterRobot():
         self.parameterForBResolve()
         self.parameterForXResolve()
 
-        self.BRThres = 3
+        self.BRThres = 2
         self.AbunLower = 0.5
         self.AbunUpper = 2.01
+
+        self.avoidrefine = abunGlobalAvoidrefine
+        self.readSearchDepth = abunGlobalReadSearchDepth
+        self.rrDisable = abunGlobalRRDisable
 
     def parameterForGraphSurgery(self):
         self.edgeThres = 1
@@ -34,7 +38,7 @@ class abunSplitParameterRobot():
         self.toRunAggB = False
         self.toRunBRB = True
         self.toRunAbunB = True
-        self.RThres = 3
+        self.RThres = 5
 
         self.BRThresB = -1
         self.AbunLowerB = -1
@@ -52,6 +56,10 @@ class abunSplitParameterRobot():
 
     def loadData(self, initial_data):
         canLoad = True
+        self.avoidrefine = abunGlobalAvoidrefine
+        self.readSearchDepth = abunGlobalReadSearchDepth
+        self.rrDisable = abunGlobalRRDisable
+
         for key in initial_data:
             if hasattr(self, key):
                 if initial_data[key] =='True' :

@@ -12,7 +12,9 @@ class fixerRobot:
         print "fixerRobot"
         self.toRunAdaptor = True
         self.toRunNoEmbedEnd = True
-        self.toRunAggressive = True
+        self.toRunAggressive = False
+        self.sdMult = 5
+        self.tuneParaOnly = False
 
 
     def loadData(self, initial_data):
@@ -243,7 +245,7 @@ def findOutliners(tDiffVec, sd, T):
     if mergerGlobalLCReads == "SR":
         thresValue = 13*sd
     elif mergerGlobalLCReads == "LR":
-        thresValue = 5*sd
+        thresValue = mergerGlobalFixerRobot.sdMult*sd
     
     n = len(tDiffVec)
     deletedList = [False for i in range(n)]
@@ -761,7 +763,7 @@ Only Long reads and long contigs case:
 def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
     
-    if True:
+    if not mergerGlobalFixerRobot.tuneParaOnly:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self"+inputName, inputName+".fasta", inputName+".fasta", ""]], houseKeeper.globalParallel )
         
     dataList = alignerRobot.extractMumData(folderName, "self"+inputName+"Out")
@@ -786,7 +788,8 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
     print "Count: " + str(count)
 
     if mergerGlobalFixerRobot.toRunAggressive == False:
-        alignSR2LC(folderName, mummerLink, inputName)
+        if not mergerGlobalFixerRobot.tuneParaOnly:
+            alignSR2LC(folderName, mummerLink, inputName)
         breakLC(folderName, inputName)
         blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
     else:
@@ -914,7 +917,7 @@ def breakPtGettingHack2(folderName, dataList, inputLCname):
         if newList[0][0] > g :
             bktmp.append(newList[0][0])
             bktmp.append(newList[0][1])
-            
+
         minThres = newList[0][1] + g
 
         for i in range(len(newList)-1):
@@ -940,7 +943,7 @@ def mainFlow(newFolderName, newMummerLink):
     filterName = "LC_filtered"
     finalOutName = "mFixed"
 
-    if True: 
+    if not mergerGlobalFixerRobot.tuneParaOnly: 
         if mergerGlobalFixerRobot.toRunAdaptor == True:
             adaptorFix.fixAdaptorSkip(newFolderName, newMummerLink, "LC.fasta", filterName) 
         else:

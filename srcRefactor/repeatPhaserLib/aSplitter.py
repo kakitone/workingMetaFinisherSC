@@ -41,7 +41,7 @@ else:
 if args['parallel'] != None:
     houseKeeper.globalParallel = int(args['parallel'])
 else:
-    houseKeeper.globalParallel = 1
+    houseKeeper.globalParallel = 20
 
 
 if args['large'] == "True":
@@ -64,6 +64,8 @@ else:
 
 if args['replace'] != None : 
     abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
+else:
+    abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
 
 if args['RRDisable'] == "True":
     abunHouseKeeper.abunGlobalRRDisable = True

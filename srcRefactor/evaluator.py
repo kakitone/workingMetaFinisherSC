@@ -8,8 +8,10 @@ import re
 
 from repeatPhaserLib import abunHouseKeeper
 from repeatPhaserLib.finisherSCCoreLib import houseKeeper
+
+from misassemblyFixerLib import merger
 	
-def runEvaluation(quastPath, folderName,paraFileName, outputFilename):
+def runEvaluation(quastPath, folderName,paraMFixerFileName,paraASplitterFileName, outputFilename):
 	command = "python "+quastPath+" " + folderName +"abun.fasta -o "  + folderName + "   -R  " + folderName + "reference.fasta"
 	os.system(command)
 	
@@ -18,13 +20,20 @@ def runEvaluation(quastPath, folderName,paraFileName, outputFilename):
 	st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d~%H:%M:%S')
 	
 	tmpString = tmpString + str(st) + ","
+
+	with open(folderName+paraMFixerFileName) as fdicMFixer:
+		myDicMFixer = json.load(fdicMFixer)
+
+	for eachitem in myDicMFixer:
+		tmpString = tmpString + str(myDicMFixer[eachitem]) + ","
     
-	with open(folderName+paraFileName) as fdic:
-		myDic = json.load(fdic)
+
+	with open(folderName+paraASplitterFileName) as fdicASplitter:
+		myDicASplitter = json.load(fdicASplitter)
 
 
-	for eachitem in myDic:
-		tmpString = tmpString + str(myDic[eachitem]) + ","
+	for eachitem in myDicASplitter:
+		tmpString = tmpString + str(myDicASplitter[eachitem]) + ","
 	
 	quastReport = folderName + "report.txt"
 	
@@ -55,15 +64,21 @@ def runEvaluation(quastPath, folderName,paraFileName, outputFilename):
 
 def loggHeaders(folderName, outputFilename):
 
-	myDic =  abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+	myDicMFixer = merger.mergerGlobalFixerRobot.__dict__
+	myDicASplitter =  abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+	
 	f = open(outputFilename , 'a')
 	tmpString  = ""
 	st = "time"
 	
 	tmpString = tmpString + str(st) + ","
 
-	for eachitem in myDic:
+	for eachitem in myDicMFixer:
 		tmpString = tmpString + eachitem + ","
+
+	for eachitem in myDicASplitter:
+		tmpString = tmpString + eachitem + ","
+
 
 	tmpString = tmpString  + "misassembly" + "," + "ncontig"+ "\n"
 
@@ -76,17 +91,18 @@ parser = argparse.ArgumentParser(description='evaluation')
 parser.add_argument('--option', required = True)
 parser.add_argument('--quastPath' , required=False)
 parser.add_argument('--folderName' , required=False)
-parser.add_argument('--paraFileName' , required=False)
+parser.add_argument('--paraMFixerFileName' , required=False)
+parser.add_argument('--paraASplitterFileName' , required=False)
 parser.add_argument('--outputFilename' , required=False)
 
 
 args = vars(parser.parse_args())
-quastPath, folderName,paraFileName, outputFilename = args['quastPath'], args['folderName'], args['paraFileName'], args['outputFilename']
+quastPath, folderName,paraMFixerFileName,paraASplitterFileName, outputFilename = args['quastPath'], args['folderName'], args['paraMFixerFileName'],args['paraASplitterFileName'], args['outputFilename']
 
 if args['option'] == 'header' :
 	loggHeaders(folderName, outputFilename)
 elif args['option'] == 'evaluate':
-	runEvaluation(quastPath, folderName,paraFileName, outputFilename)
+	runEvaluation(quastPath, folderName,paraMFixerFileName,paraASplitterFileName, outputFilename)
 
 
 
