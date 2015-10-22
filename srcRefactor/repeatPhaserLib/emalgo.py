@@ -12,12 +12,9 @@ High level requirement :
 3) Provide a level of confidence
 
 '''
-from srcRefactor.repeatPhaserLib.finisherSCCoreLib \
-	import IORobot
-from srcRefactor.repeatPhaserLib.finisherSCCoreLib \
-	import alignerRobot
-from srcRefactor.repeatPhaserLib.finisherSCCoreLib \
-	import graphLib
+from srcRefactor.repeatPhaserLib.finisherSCCoreLib import IORobot
+from srcRefactor.repeatPhaserLib.finisherSCCoreLib import alignerRobot
+from srcRefactor.repeatPhaserLib.finisherSCCoreLib import graphLib
 from srcRefactor.repeatPhaserLib import abunGraphLib
 from srcRefactor.repeatPhaserLib import abunHouseKeeper
 from operator import itemgetter
