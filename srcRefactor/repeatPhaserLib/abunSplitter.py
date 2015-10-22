@@ -707,7 +707,7 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
     
     return Gnew
 
-def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
+def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mummerLink):
 
     if abunHouseKeeper.abunGlobalSplitParameterRobot.runBResolve:
         print "abunHouseKeeper.abunGlobalSplitParameterRobot.runBResolve", abunHouseKeeper.abunGlobalSplitParameterRobot.runBResolve
@@ -787,7 +787,7 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
     else:
         return Gnew
             
-def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1):
+def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1, mummerLink):
 
     if abunHouseKeeper.abunGlobalSplitParameterRobot.runXResolve:
         G = graphLib.seqGraph(0)
@@ -1153,10 +1153,10 @@ def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  con
     Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
     Gnew.logEdges(folderName, "graphsurgery")
     
-    Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic)
+    Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mummerLink)
     Gnew.logEdges(folderName, "BResolution")
     
-    XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1 )
+    XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1 , mummerLink)
     Gnew.logEdges(folderName, "XResolution")
 
     readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilename, N1,contigReadGraph)
