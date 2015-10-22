@@ -1214,7 +1214,7 @@ def	BResolvePreparation(folderName, inList, outList, G, Grev, N1, mummerLink):
 	return resolvedList
 
 
-t0 = time.time()
-mainFlow()
-print "Time spent (s) : ", time.time() - t0
+#t0 = time.time()
+#mainFlow()
+#print "Time spent (s) : ", time.time() - t0
 
