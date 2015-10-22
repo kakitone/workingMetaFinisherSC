@@ -15,6 +15,7 @@ High level requirement :
 from srcRefactor.repeatPhaserLib.finisherSCCoreLib import IORobot
 from srcRefactor.repeatPhaserLib.finisherSCCoreLib import alignerRobot
 from srcRefactor.repeatPhaserLib.finisherSCCoreLib import graphLib
+from srcRefactor.repeatPhaserLib.finisherSCCoreLib import houseKeeper
 from srcRefactor.repeatPhaserLib import abunGraphLib
 from srcRefactor.repeatPhaserLib import abunHouseKeeper
 from operator import itemgetter
@@ -481,7 +482,7 @@ def localConsensus(folderName, bins, readsDic,templatesDic, nameOfTemplate):
 	else:
 		print "Parallel"
 		workerList = []
-		nProc = 4
+		nProc = houseKeeper.globalParallel
 
 		for k in range(len(bins)-1):
 			if len(bins[k].readList) > 1:
