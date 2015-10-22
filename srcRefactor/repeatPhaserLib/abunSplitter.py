@@ -767,7 +767,7 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
                     resolvedCombine = resolveConflict(combinedList)
                     Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
             else:
-                resolvedCombine = emalgo.BResolvePreparation(folderName, inList, outList,  G, Grev, N1)
+                resolvedCombine = emalgo.BResolvePreparation(folderName, inList, outList,  G, Grev, N1, mummerLink)
                 Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
 
         Gnew.condense()
@@ -814,7 +814,7 @@ def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1):
 
                 brResolvedListforX = xNodeBrResolving(Gnew, G,Grev, folderName, N1)
   
-        combinedList = xNodeEMResolving(Gnew, G, Grev, folderName, myCountDic, lenDic, N1)
+        combinedList = xNodeEMResolving(Gnew, G, Grev, folderName, myCountDic, lenDic, N1, mummerLink)
         
         print "combinedList", combinedList
 
@@ -908,9 +908,9 @@ def readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilena
     if True:
         nonRedundantResolver.removeRedundantWithFile(folderName , mummerLink, "abunPre", "abunMum", "abun")
 
-def xNodeEMResolving(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1):
+def xNodeEMResolving(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1, mummerLink):
     print "emalgo"
-    combinedList = emalgo.XResolvePreparation(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1)
+    combinedList = emalgo.XResolvePreparation(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1, mummerLink)
     print "combinedList", combinedList
     return combinedList
     

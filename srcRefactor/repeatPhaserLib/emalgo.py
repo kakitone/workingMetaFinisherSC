@@ -136,7 +136,7 @@ def preparation(folderName):
 		IORobot.writeSegOut([noisyIntermediate], folderName, "intermediate.fasta")
 		IORobot.writeSegOut([contigDic["Contig1_p"]], folderName, "intermediateNoiseless.fasta")
 
-def computeReadAssociation(folderName, prevIteration, constants, isDebug):
+def computeReadAssociation(folderName, prevIteration, constants, isDebug, mummerLink):
 	'''
 	Input :  prevIteration = [lambdas, templates, score] , constants = [basesMappedToEachContig]
 	Output : readMatching = [read2templateDic, template2readDic]
@@ -147,7 +147,7 @@ def computeReadAssociation(folderName, prevIteration, constants, isDebug):
 	'''
 	IORobot.writeSegOut(prevIteration[1], folderName, "templates.fasta")
 	#assert(False)
-	readMatching = findAnchors(folderName, prevIteration, isDebug)
+	readMatching = findAnchors(folderName, prevIteration, isDebug, mummerLink)
 	return readMatching
 
 def computeLambdaList(folderName, prevIteration, readMatching, constants):
@@ -203,15 +203,16 @@ def computeInteriorList(folderName , prevIteration, readMatching, constants, isD
 def concatAndFormat(folderName):
 	assert(True)
 
-def findAnchors(folderName, prevIteration, isDebug):
+def findAnchors(folderName, prevIteration, isDebug, mummerLink):
 	'''
 	Input: IORobot.writeSegOut(ctgList, folderName, "templates.fasta")
 		   IORobot.putListToFileO(folderName, "raw_reads.fasta", "RList", RList)
     Output : the assignmentDic and lookUpDic
 
 	'''
+
 	if not  isDebug:			
-		alignerRobot.useMummerAlign("/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/", folderName, "templateAnchor", "RList_Double.fasta", "templates.fasta", False, "", False)
+		alignerRobot.useMummerAlign(mummerLink, folderName, "templateAnchor", "RList_Double.fasta", "templates.fasta", False, "", False)
 		dataList = alignerRobot.extractMumData(folderName, "templateAnchor" +"Out")
 		
 		lenDicReads = IORobot.obtainLength(folderName, "RList_Double.fasta")
@@ -408,19 +409,19 @@ def loadAlignment(folderName, nameOfTemplate, associatedReadAlignList):
 	temp2readAlignDic = {}
 	for eachitem in associatedReadAlignList:
 		readName = 	eachitem[-2]
-		dic = parseAlignment(folderName, nameOfTemplate, readName)
+		dic = parseAlignment(folderName, nameOfTemplate, readName, mummerLink)
 		temp2readAlignDic[readName] = dic
 
 	#assert(False)
 
 	return temp2readAlignDic
 
-def parseAlignment(folderName, nameOfTemplate, readName):
+def parseAlignment(folderName, nameOfTemplate, readName, mummerLink):
 	# print "show-aligns [options] <delta file> <IdR> <IdQ>"
 	# /Users/kakitlam/Desktop/experimentBench/MUMmer3.23/show-aligns -w 10000  dataFolder/templateAnchor.delta Segkk48988 Segkk1
 	# [1, 5986, 6734, 12733, 5986, 6000, 97.72, u'Segkk26449', u'Segkk0']
 
-	mummerPath = "/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/"
+	mummerPath = mummerLink
 	command = mummerPath + "show-aligns -w 100000 " + folderName + "templateAnchor.delta " + readName + " " + nameOfTemplate + "  | head -10 | tail -2   > " + folderName + "alignmentFile"
 	os.system( command)
 
@@ -626,7 +627,7 @@ def clustalw2MSA(folderName, segList, startingIndex):
 def concatAndFormat(folderName):
 	assert(True)
 
-def computeScore(folderName, eachMatching, lambdas, interiors, readMatching, constants, isDebug):
+def computeScore(folderName, eachMatching, lambdas, interiors, readMatching, constants, isDebug, mummerLink):
 	'''
 	Input : lambdas, interiors, readMatching, constants
 	Output : score \in real
@@ -643,7 +644,7 @@ def computeScore(folderName, eachMatching, lambdas, interiors, readMatching, con
 	if not isDebug:			
 
 	#a) Perform an alignment and parse the results 
-		alignerRobot.useMummerAlign("/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/", folderName, "interiorAnchor", "RList_Double.fasta", "interiors.fasta", False, "", False)
+		alignerRobot.useMummerAlign(mummerLink, folderName, "interiorAnchor", "RList_Double.fasta", "interiors.fasta", False, "", False)
 		readAnchorDic = {}
 		dataList = alignerRobot.extractMumData(folderName, "interiorAnchor" +"Out")
 		thres = 30
@@ -705,9 +706,9 @@ def computeScore(folderName, eachMatching, lambdas, interiors, readMatching, con
 		leftContig, rightContig = eachMatching[i][0], eachMatching[i][1]
 		left, middle, right = contigsDic[leftContig], interiorsDic["Segkk"+ str(i)], contigsDic[rightContig]
 		totalLen = len(left) + len(middle) + len(right)
-		overlap = IORobot.align(left, middle ,folderName,"/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/")
+		overlap = IORobot.align(left, middle ,folderName,mummerLink)
 		totalLen += overlap[0]
-		overlap = IORobot.align(middle, right ,folderName,"/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/")
+		overlap = IORobot.align(middle, right ,folderName,mummerLink)
 		totalLen += overlap[0]
 		LiList.append(totalLen)
 	
@@ -727,7 +728,7 @@ def convertName(myName):
 	dataInfo = myName.split("_")
 	return "Segkk" + dataInfo[0][6:]
 
-def initMatching(folderName, eachMatching):
+def initMatching(folderName, eachMatching, mummerLink):
 	'''
 	Input: eachMatching,  
 	Output: prevIteration = [lambdas, templates, score] , constants = [basesMappedToEachContig]
@@ -738,7 +739,6 @@ def initMatching(folderName, eachMatching):
 	4) V return data 
 	'''	
 
-	mummerLink= "/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/"
 	
 	# 1) 
 	score  =  0 
@@ -930,7 +930,7 @@ def loadRListDic(folderName):
 
 	return RListDic
 
-def XResolvePreparation(Gnew, GContigRead, Grev, folderName, myCountDic, lenDic, N1):
+def XResolvePreparation(Gnew, GContigRead, Grev, folderName, myCountDic, lenDic, N1, mummerLink):
 	print "XResolvePreparation"
 	'''
 	Implementation steps (TODO : @ kakitfive): 
@@ -993,7 +993,7 @@ def XResolvePreparation(Gnew, GContigRead, Grev, folderName, myCountDic, lenDic,
 			IORobot.writeToFile_Double1(folderName, "RList.fasta", "RList_Double.fasta", "contig")
 
 
-			score, matching, contentForBetterInteriorToFlank = EMFlow(folderName)
+			score, matching, contentForBetterInteriorToFlank = EMFlow(folderName, mummerLink)
 			ansList = []
 
 
@@ -1046,9 +1046,8 @@ def findAPair(pathList):
 	#assert(False)
 	return paths 
 
-def findPathSegments(folderName, paths, N1):
+def findPathSegments(folderName, paths, N1, mummerLink):
 	# find the segments by overlap and joining subroutine in IORobot
-	mummerLink  = "/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/"
 	contigFilename = "improved3"
 	readsetFilename = "phasingSeedName"
 	contigReadGraph = "phaseStringGraph1"
@@ -1109,7 +1108,7 @@ def mainFlow():
 		inList , outList =  [6, 14], [3, 11] 
 		BResolvePreparation(folderName, inList, outList, G, Grev, N1)
 
-def EMFlow(folderName):
+def EMFlow(folderName, mummerLink):
 	matchingList = [] 
 	numberOfIterations = 1
 	isDebug = False
@@ -1120,13 +1119,13 @@ def EMFlow(folderName):
 	# print matchingList
 
 	for eachMatching in matchingList:
-		prevIteration, constants = initMatching(folderName, eachMatching)
+		prevIteration, constants = initMatching(folderName, eachMatching, mummerLink)
 
 		for iterationI in range(numberOfIterations):	
-			readMatching = computeReadAssociation(folderName, prevIteration, constants, isDebug)
+			readMatching = computeReadAssociation(folderName, prevIteration, constants, isDebug, mummerLink)
 			lambdas = computeLambdaList(folderName, prevIteration, readMatching, constants)
 			interiors = computeInteriorList(folderName , prevIteration, readMatching, constants, isDebug )
-			score = computeScore(folderName, eachMatching, lambdas, interiors, readMatching, constants, isDebug)
+			score = computeScore(folderName, eachMatching, lambdas, interiors, readMatching, constants, isDebug, mummerLink)
 			prevIteration = [lambdas, interiors, score] 
 
 		#assert(False)
@@ -1136,7 +1135,7 @@ def EMFlow(folderName):
 
 	return score, matching, contentForBetterInteriorToFlank
 
-def	BResolvePreparation(folderName, inList, outList, G, Grev, N1):
+def	BResolvePreparation(folderName, inList, outList, G, Grev, N1, mummerLink):
 	print "BResolvePreparation"
 	# format :  resolvedList, brResolvedList, inList, outList [] [[3, 1], [3, 7]] [6] [3, 15]
 	# resolvedList in standard format ... just that inList, outList has unnecessary *2 for head/tail difference
@@ -1182,12 +1181,12 @@ def	BResolvePreparation(folderName, inList, outList, G, Grev, N1):
 		
 		pathList = findPathList(folderName, G, N1, contigLeft, contigRight)
 		paths = findAPair(pathList)
-		path1, path2 = findPathSegments(folderName, paths, N1)
+		path1, path2 = findPathSegments(folderName, paths, N1, mummerLink)
 
 		IORobot.writeSegOut([path1], folderName, "path1.fasta")
 		IORobot.writeSegOut([path2], folderName, "path2.fasta")
 
-		alignerRobot.useMummerAlign("/Users/kakitlam/Desktop/experimentBench/MUMmer3.23/", folderName, "comparison", "path1.fasta", "path2.fasta", False, "", False)
+		alignerRobot.useMummerAlign(mummerLink, folderName, "comparison", "path1.fasta", "path2.fasta", False, "", False)
 		dataList = alignerRobot.extractMumData(folderName, "comparison" +"Out")
 
 		dataList.sort(key=itemgetter(-2))
@@ -1204,7 +1203,7 @@ def	BResolvePreparation(folderName, inList, outList, G, Grev, N1):
 
 		IORobot.writeSegOut([path1Dic["Segkk0"][begin-1:end]], folderName, "intermediate.fasta")
 
-		ratioScore, matching, contentForBetterInteriorToFlank = EMFlow(folderName)
+		ratioScore, matching, contentForBetterInteriorToFlank = EMFlow(folderName, mummerLink)
 
 		#assert(False)
 		if 1/ratioScore > 1.001:
@@ -1215,7 +1214,7 @@ def	BResolvePreparation(folderName, inList, outList, G, Grev, N1):
 	return resolvedList
 
 
-#t0 = time.time()
-#mainFlow()
-#print "Time spent (s) : ", time.time() - t0
+t0 = time.time()
+mainFlow()
+print "Time spent (s) : ", time.time() - t0
 
