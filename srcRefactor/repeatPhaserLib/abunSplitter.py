@@ -1146,12 +1146,14 @@ def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  con
     6)Read contigs out from graph
     7)CheckAns and get it done today again... 
     '''
-
+    emalgo.generateAssociatedReadDic(folderName) 
+    
     lenDic = IORobot.obtainLength(folderName, contigFilename+"_Double.fasta")
     N1 = len(lenDic)
 
     Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
     Gnew.logEdges(folderName, "graphsurgery")
+    
     
     Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mummerLink)
     Gnew.logEdges(folderName, "BResolution")
