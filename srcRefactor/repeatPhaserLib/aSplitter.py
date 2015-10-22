@@ -17,16 +17,13 @@ parser.add_argument('-f', '--fast', help= 'Fast aligns contigs (input is True)',
 parser.add_argument('-par', '--parallel', help= 'Fast aligns contigs (input is maximum number of threads)', required=False)
 parser.add_argument('-l', '--large', help= 'Large number of contigs/large size of contigs (input is True)', required=False)
 
-
 parser.add_argument('-rp', '--replace', help= 'Input files to aSplitter(e.g. noEmbed.fasta, improved.fasta, improved2.fasta or improved3.fasta)', required=False)
 parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estimation (input is True)', required=False)
 parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)
 parser.add_argument('-rd', '--RRDisable', help= 'Whether one should disable Read to Read overlap check (input is True)', required=False)
 parser.add_argument('-pk', '--pickup', help= 'where to run ASplitter, map/count/split', required=False)
 
-
 parser.add_argument('-op', '--option', help='File of parameter list (input is opa=true opb=false)', required=False)
-
 
 args = vars(parser.parse_args())
 
@@ -50,27 +47,30 @@ else:
     houseKeeper.globalLarge = False
 
 
-if args['avoidrefine'] == "True":
-    abunHouseKeeper.abunGlobalAvoidrefine = True
-else:
+if args['avoidrefine'] == "False":
     abunHouseKeeper.abunGlobalAvoidrefine = False
+else:
+    abunHouseKeeper.abunGlobalAvoidrefine = True
 
 
 if args['readsearch'] != None:
     abunHouseKeeper.abunGlobalReadSearchDepth = int(args['readsearch']) 
 else:
-    abunHouseKeeper.abunGlobalReadSearchDepth = 1
+    abunHouseKeeper.abunGlobalReadSearchDepth = 0
 
 
 if args['replace'] != None : 
-    abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
+    if  args['replace'] == 'skip':
+        print "skip copy"
+    else:
+        abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
 else:
     abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
 
-if args['RRDisable'] == "True":
-    abunHouseKeeper.abunGlobalRRDisable = True
-else:
+if args['RRDisable'] == "False":
     abunHouseKeeper.abunGlobalRRDisable = False
+else:
+    abunHouseKeeper.abunGlobalRRDisable = True
 
 
 if args['pickup'] in [ "map", "count", "split"] :
@@ -86,12 +86,14 @@ if args['option'] != None:
         settingDic[tmp[0]] = tmp[1]
 
     canLoad = abunHouseKeeper.abunGlobalSplitParameterRobot.loadData(settingDic)
-    if canLoad:
-        settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
-        with open(newFolderName + "option.json", 'w') as f:
-            json.dump(settingDic, f)
 else:
     canLoad = True    
+
+if canLoad:
+    settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+    with open(newFolderName + "option.json", 'w') as f:
+        json.dump(settingDic, f)
+
 
 if pathExists and canLoad:
     abunSplitter.mainFlow(newFolderName, newMummerLink)

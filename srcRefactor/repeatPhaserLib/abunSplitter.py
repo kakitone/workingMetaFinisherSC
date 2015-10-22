@@ -6,7 +6,7 @@ from operator import itemgetter
 import copy
 import sys
 from random import shuffle
-
+from multiprocessing import Pool
 
 from finisherSCCoreLib import alignerRobot
 from finisherSCCoreLib import graphLib
@@ -19,6 +19,7 @@ import readContigGraphFormer
 import repeatFinder
 import abunHouseKeeper
 import abunGraphLib
+import emalgo
 
 
 ### Abundance split and its subroutines
@@ -44,7 +45,6 @@ def getCt(inList ,myCountDic):
         newInList.append([tmp2 , myCountDic["Segkk"+str(tmp1)]])
     return newInList 
 
-
 def getCtAgg(inList ,myCountDic, Gnew, lenDic):
     newInList = []
     print "New getCtAgg", len(inList)
@@ -68,13 +68,11 @@ def getCtAgg(inList ,myCountDic, Gnew, lenDic):
 
     return newInList 
 
-
 def getCtTwoToOne(inList ,myCountDic):
     newInList = []
     for i in inList: 
         newInList.append([i , myCountDic["Segkk"+str(i/2)]])
     return newInList 
-
 
 def getCtTwoToOneAgg(inList ,myCountDic, Gnew, lenDic):
 
@@ -84,25 +82,28 @@ def getCtTwoToOneAgg(inList ,myCountDic, Gnew, lenDic):
 
     return getCtAgg(newInList ,myCountDic, Gnew, lenDic)
 
-
 def satisfyMatch(initem ,newOutList, sd):
     print "AbunLower, AbunUpper", abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower,abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper
+
     found = -1
     inIndex , inCt = initem[0], initem[1]
     # First check pt
     targetItem = -1
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
+        print abs(outCt - inCt)
         if abs(outCt - inCt) < abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower*sd and inIndex != outIndex:
             targetItem = outIndex
             
     # Second check pt
+    
     rejection = False
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
         if outIndex != targetItem :
             if abs(outCt - inCt) <=abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper*sd :
                 rejection = True
+                print "rejection ", abs(outCt - inCt)
                 
     # Combined check 
     if not rejection and targetItem != -1:
@@ -118,7 +119,6 @@ def determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1):
 
     return formResolveListForMatch(folderName, newInList, newOutList, sd, contigReadGraph, N1) 
 
-
 def transformToCount(inList, outList, myCountDic, folderName,contigReadGraph, N1):
 
     newInList , newOutList = [], []
@@ -133,7 +133,6 @@ def transformToCount(inList, outList, myCountDic, folderName,contigReadGraph, N1
     sd = np.std(sizeList)
     
     return sd, newInList, newOutList
-
 
 def transformToCountAggregate(inList, outList, myCountDic, folderName,contigReadGraph, N1,  Gnew, lenDic):
 
@@ -169,8 +168,6 @@ def determindMatchAggregate(inList, outList, myCountDic, folderName,contigReadGr
     sd, newInList, newOutList = transformToCountAggregate(inList, outList, myCountDic, folderName,contigReadGraph, N1,  Gnew, lenDic)
     return formResolveListForMatch(folderName, newInList, newOutList, sd, contigReadGraph, N1) 
 
-
-
 def addEdges(G, resolvedList):
     print "len(G.graphNodesList)",  len(G.graphNodesList)
     
@@ -203,101 +200,8 @@ def generateGapContentLookup(folderName, mummerLink, oldResolvedList, contigRead
         for ii in range(len(tmpList)-1):
             resolvedList.append([tmpList[ii], tmpList[ii+1]])
         
-        
-    for eachmatchpair in resolvedList:
-        print eachmatchpair
-        leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
-        
-        succReadsList = abunGraphLib.findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1)
-        
-        succReadsList = []
-        G = graphLib.seqGraph(0)
-        G.loadFromFile(folderName, contigReadGraph)
-        
-        allPaths = abunGraphLib.findAllPathK(leftCtgIndex,rightCtgIndex,G, 5)
-        # shuffle(allPaths)
+    gapContentLookUpList = abunGraphLib.parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)
 
-        print "allPaths" , allPaths
-        
-        possibleList = []
-        for p in allPaths:
-            noContig = True
-            for pp in p[1:-1]:
-                if pp < N1:
-                    noContig = False
-            if noContig == True:
-                possibleList.append(p)
-        print "possibleList", possibleList
-
-        minListLen = 1000
-        for p in possibleList:
-            if len(p) < minListLen:
-                succReadsList = p
-                minListLen = len(p)
-
-        succReadsList.pop(0)
-        succReadsList.pop(-1)
-
-        print "succReadsList" , succReadsList
-        
-        if len(succReadsList) == 0:
-            contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
-            leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-
-            contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
-            rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-            
-            overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            
-            print "overlap contig : ", overlap
-            
-            leftEnd = len(leftSeg) - overlap[0]
-            middleContent = ""
-            
-        else:
-            
-            contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
-            print contigName
-            leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-            
-            readName = abunHouseKeeper.parseIDToName(succReadsList[0], 'R', N1)
-            print readName
-            rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-            
-            overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            
-            print "overlap start read : ", overlap
-            
-            leftEnd = len(leftSeg) - overlap[0]
-            
-            middleContent = ""
-            
-            for i in range(len(succReadsList)-1):
-                readName = abunHouseKeeper.parseIDToName(succReadsList[i], 'R', N1)
-                leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-            
-                readName = abunHouseKeeper.parseIDToName(succReadsList[i+1], 'R', N1)
-                rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-                
-                overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-                print "overlap middle read : ", overlap
-                middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]] 
-            
-            
-            readName = abunHouseKeeper.parseIDToName(succReadsList[-1], 'R', N1)
-            leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-            
-            contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
-            rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-            
-            overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            print "overlap end read : ", overlap
-            
-            middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]]
-            
-        
-        gapContentLookUpList.append([leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent])
-        
     return gapContentLookUpList   
 
 def abunSplit(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
@@ -353,61 +257,30 @@ def abunSplit(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilenam
     
     G.condense()
     IORobot.extractGraphToContigs(G, folderName, mummerLink, "abun.fasta", contigFilename+"_Double.fasta", gapContentLookUpDic)
-    
-
-
-def splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename ):
-
-    '''
-    Input : repeatSpecification.txt , myCountDic.json, improved3.fasta, raw_reads.fasta
-    Output : abunsplit.fasta
-    
-    Algorithm : 
-    
-    1. Load data from various sources [various json files]
-    
-    2. For each repeat interior:
-        a) identify the abundances associated with in/out contigs
-        b) perform a split and record the split
-    
-    3. Use split results to generate contigs [may already exist in newPhasing.py ] 
-        a) use a graph to capture the split results 
-        b) use reads to fill in any gaps 
-        c) read out the contigs 
-    
-    '''
-    
-    
-    with open(folderName + 'myCountDic.json') as f:
-        myCountDic = json.load(f)
-        
-    #abunSplit(folderName, mummerLink, myCountDic, contigReadGraph, contigFilename,readsetFilename )    
-    #abunSplitWithXResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename )
-    abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename )
-    
-
-'''
-Input : string_graph_3, improved3.fasta, raw_reads.fasta
-Output : string_graph_4 with weights [need a data structure to store the weight on node]
-
-Algorithm : 
-1. Find your favorite mappers to map read back
-    a. MUMmer, Bowtie, bbmap, any that works V 
-    b. And then write a short parser to parse the results V 
-2. Calculate count on the abundances 
-    a. Aggregate by taking average [put weights on bin along contigs]
-    b. Inheritance and a subclass 
-3. Find your favorite graphical tool to display 
-    a. Use a javascript library [halfviz should just work ! put weight on edge ]
-
-'''
 
 def evaluateCoverage(dataList, lenDic, readLenDic, folderName,mummerLink, continueFilter, contigFilename):
     
+    '''
+    not sure if that is the right documentation... 
+
+    Input : string_graph_3, improved3.fasta, raw_reads.fasta
+    Output : string_graph_4 with weights [need a data structure to store the weight on node]
+
+    Algorithm : 
+    1. Find your favorite mappers to map read back
+        a. MUMmer, Bowtie, bbmap, any that works V 
+        b. And then write a short parser to parse the results V 
+    2. Calculate count on the abundances 
+        a. Aggregate by taking average [put weights on bin along contigs]
+        b. Inheritance and a subclass 
+    3. Find your favorite graphical tool to display 
+        a. Use a javascript library [halfviz should just work ! put weight on edge ]
+
+    '''    
     myCountDic = {}
     for eachitem in lenDic:
         myCountDic[eachitem] = 0
-            
+    
     dataList.sort(key = itemgetter(-1)) 
     
     ctkk, ctbase = 0, 0
@@ -477,7 +350,6 @@ def evaluateCoverage(dataList, lenDic, readLenDic, folderName,mummerLink, contin
         myCountDic[eachitem] = myCountDic[eachitem]/(1.0*lenDic[eachitem])
         
     return myCountDic
-    
 
 def generateAbundanceGraph(folderName, mummerLink, contigFilename):
     
@@ -560,50 +432,20 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
     
     return myCountDic
 
-def mainFlow(folderName, mummerLink):
-    print "Hello world"
-    
-    contigFilename = "improved3"
-    readsetFilename = "phasingSeedName"
-    optTypeFileHeader = "phaseString"
-    contigReadGraph = "phaseStringGraph1"
-    repeatFilename = "phaseRepeat.txt"
-    repeatSpec = "repeatSpecification.txt"
-    optionToRun = "xphase"
-    
-        
-    if abunHouseKeeper.abunGlobalRunPickUp == "map" :
-        associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
-        readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph )
-        repeatFinder.identifyRepeat(folderName, mummerLink,contigFilename,contigReadGraph, repeatFilename, optionToRun )
-        
-    
-    if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" :
-        myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
-        
-    if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" or abunHouseKeeper.abunGlobalRunPickUp == "split" :
-        splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
-    
-        
-    os.system("cp selected_raw.part-* "+ folderName )
-    os.system("rm selected_raw.part-*")
-  
-'''
-Input : contigGraph , abunInfo , folderName  
-
-Output: myresolvedList.json, gapContentLookUp.json, dummyNodeMapping.json
-
-Algorithm :
-    1) Tranverse the graph 
-        a) If the node can well be fixed with sd requirement met 
-            i) Link it across and add the pair into the myresolvedList, gapContentLookUp
-            ii) Add dummynodes and fill in the dummyNodeMapping 
-    
-    2) Format return and output as temp file 
-'''
-
 def xNodeResolving(folderName, contigReadGraph):
-    
+    '''
+    Input : contigGraph , abunInfo , folderName  
+
+    Output: myresolvedList.json, gapContentLookUp.json, dummyNodeMapping.json
+
+    Algorithm :
+        1) Tranverse the graph 
+            a) If the node can well be fixed with sd requirement met 
+                i) Link it across and add the pair into the myresolvedList, gapContentLookUp
+                ii) Add dummynodes and fill in the dummyNodeMapping 
+        
+        2) Format return and output as temp file 
+    '''    
     
     ### Init G, myCountDic, N1
     G = graphLib.seqGraph(0)
@@ -672,7 +514,6 @@ def xNodeResolving(folderName, contigReadGraph):
                     extraCounter = extraCounter + 1
 
     return resolvedList, mapDummyToRealDic
-
 
 def abunSplitWithXResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
     N1 = len(myCountDic)*2
@@ -785,8 +626,6 @@ def abunSplitWithXResolve(folderName, mummerLink, myCountDic,contigReadGraph,  c
         
         IORobot.extractGraphToContigs(G, folderName, mummerLink, "abun.fasta", "tmpWithDummy.fasta", gapContentLookUpDic, mapDummyToRealDic)
 
-
-
 def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename,contigFilename ):
 
     ### Transitive reduction and remove double pointers
@@ -838,14 +677,20 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
             Gnew.removeEdge(u, yIndex)
 
 
+    Gnew.reportEdge()
+    ### Trying out the new component 
+    import toCondenseFixer
+    Gnew = toCondenseFixer.noGoZoneDefiner(Gnew, folderName)
+
     Gnew.symGraph()
+    #Gnew.reportEdge()
     ### End filter adaptor skipped case 
 
     if abunHouseKeeper.abunGlobalSplitParameterRobot.runGraphSurgery:
     
         Gnew.initAdv()    
         if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunCondenseRemove:
-            Gnew.condenseEdgeRemove(G)
+            Gnew.condenseEdgeRemove(G, folderName, mummerLink, contigFilename)
 
         if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunDoubltPtr:
             Gnew.doubleEdgeReduction()
@@ -861,7 +706,6 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
         Gnew.findAdjList()
     
     return Gnew
-
 
 def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
 
@@ -879,65 +723,70 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
         
         biResolvedCombineList = []
 
-        G = graphLib.seqGraph(0)
+        G = abunGraphLib.seqGraphWt(0)
         G.loadFromFile(folderName, contigReadGraph)
 
         Grev = abunGraphLib.formReverseGraphFast(G)
 
+        abunAnalysisList = []
 
         for eachitem in repeatPairs:
             inList, outList = eachitem[0], eachitem[1]
-            resolvedList, brResolvedList = [], [] 
+            if False:
+                resolvedList, brResolvedList = [], [] 
 
-            if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAbunB:
-                if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerB > 0:
-                    abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerB
+                if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAbunB:
+                    if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerB > 0:
+                        abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerB
 
-                if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperB > 0:
-                    abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperB
+                    if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperB > 0:
+                        abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperB
 
+                    if not abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAggB: 
+                        resolvedList = determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1)
+                    else:
 
+                        resolvedList = determindMatchAggregate(inList, outList, myCountDic, folderName,contigReadGraph, N1, Gnew, lenDic)
+                                    
 
-                if not abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAggB: 
-                    resolvedList = determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1)
-                else:
+                if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunBRB:
+                    if abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresB > 0:
+                        abunHouseKeeper.abunGlobalSplitParameterRobot.BRThres = abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresB
 
-                    resolvedList = determindMatchAggregate(inList, outList, myCountDic, folderName,contigReadGraph, N1, Gnew, lenDic)
-                                
-
-            if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunBRB:
-                if abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresB > 0:
-                    abunHouseKeeper.abunGlobalSplitParameterRobot.BRThres = abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresB
-
-                brResolvedList = formBRReolve(folderName, inList, outList, G, Grev, True, N1)
-
-
-            combinedList = abunHouseKeeper.getDistinct(resolvedList + brResolvedList)
-            
-            print "resolvedList, brResolvedList, inList, outList", resolvedList, brResolvedList, inList, outList
-            print "resolveConflict(combinedList)", resolveConflict(combinedList)      
+                    brResolvedList = formBRReolve(folderName, inList, outList, G, Grev, True, N1)
 
 
-            if  len(inList) <= maxRThres and  len(outList) <= maxRThres and len(inList) > 0 and len(outList) > 0 :
-                #biResolvedCombineList += resolveConflict(combinedList)
+                combinedList = abunHouseKeeper.getDistinct(resolvedList + brResolvedList)
                 
-                resolvedCombine = resolveConflict(combinedList)
+                print "resolvedList, brResolvedList, inList, outList", resolvedList, brResolvedList, inList, outList
+                
+                print "resolveConflict(combinedList)", resolveConflict(combinedList)      
 
-                Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList)
+                abunAnalysisList.append([inList, outList,resolvedList, brResolvedList, resolveConflict(combinedList) ])
+                if  len(inList) <= maxRThres and  len(outList) <= maxRThres and len(inList) > 0 and len(outList) > 0:
+                    resolvedCombine = resolveConflict(combinedList)
+                    Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
+            else:
+                resolvedCombine = emalgo.BResolvePreparation(folderName, inList, outList,  G, Grev, N1)
+                Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
 
-            
-        #Gnew.bipartiteResolve(biResolvedCombineList)
         Gnew.condense()
 
         with open(folderName + "biResolvedCombineList.json", 'w') as f:
             json.dump(biResolvedCombineList, f)    
+
+
+        with open(folderName + "abunAnalysisList.json", 'w') as f:
+            json.dump(abunAnalysisList, f)    
+
+        #assert(1==2)
+
 
         return Gnew
 
     else:
         return Gnew
             
-
 def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1):
 
     if abunHouseKeeper.abunGlobalSplitParameterRobot.runXResolve:
@@ -948,24 +797,26 @@ def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1):
         
         xResolvedList, brResolvedListforX = [[] for i in range(N1)], [[] for i in range(N1)]
         
-        if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAbunX:
-            if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerX > 0:
-                abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerX
+        if False:
+            if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAbunX:
+                if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerX > 0:
+                    abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerX
 
-            if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperX > 0:
-                abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperX
+                if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperX > 0:
+                    abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperX
 
-            xResolvedList =  xNodeAdvResolving(Gnew, G, folderName, myCountDic, lenDic)
+                xResolvedList =  xNodeAdvResolving(Gnew, G, folderName, myCountDic, lenDic)
+                
+            if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunBRX:
+                
+                if abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresX > 0:
+                    abunHouseKeeper.abunGlobalSplitParameterRobot.BRThres = abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresX
+
+                brResolvedListforX = xNodeBrResolving(Gnew, G,Grev, folderName, N1)
+  
+        combinedList = xNodeEMResolving(Gnew, G, Grev, folderName, myCountDic, lenDic, N1)
         
-        if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunBRX:
-            
-            if abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresX > 0:
-                abunHouseKeeper.abunGlobalSplitParameterRobot.BRThres = abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresX
-
-            brResolvedListforX = xNodeBrResolving(Gnew, G,Grev, folderName, N1)
-
-
-        combinedList = resolveConflictX(xResolvedList, brResolvedListforX) 
+        print "combinedList", combinedList
 
         Gnew.xResolve(combinedList)        
         Gnew.condense()
@@ -1012,7 +863,6 @@ def formGapLookUp(folderName,contigReadGraph, mummerLink,contigFilename,readsetF
     with open(folderName + "gapContentLookUpDic.json", 'w') as f:
         json.dump(gapContentLookUpDic, f)
 
-
 def readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilename, N1, contigReadGraph):
 
     json_data = open(folderName + "mapDummyToRealDic.json", 'r')
@@ -1058,29 +908,12 @@ def readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilena
     if True:
         nonRedundantResolver.removeRedundantWithFile(folderName , mummerLink, "abunPre", "abunMum", "abun")
 
-def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
-
-    '''
-    Algorithm: 
-    1)Load ContigReadGraph and form xResolvedGraph
-    2)Transitive reduction and remove double pointers
-    3)Bipartite resolution
-    4)xResolve 
-    5)Form gapLookUp 
-    6)Read contigs out from graph
-    7)CheckAns and get it done today again... 
-    '''
-
-    lenDic = IORobot.obtainLength(folderName, contigFilename+"_Double.fasta")
-    N1 = len(lenDic)
-
-    Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
-    Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic)
-    XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1 )
-
-    readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilename, N1,contigReadGraph)
-
-
+def xNodeEMResolving(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1):
+    print "emalgo"
+    combinedList = emalgo.XResolvePreparation(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1)
+    print "combinedList", combinedList
+    return combinedList
+    
 def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
     N1 = len(myCountDic)*2
     
@@ -1112,11 +945,12 @@ def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
             
         sd = np.std(sizeList)
 
-        print "SD: " , sd
+        print "SD: " , sd, len(inListCt), len(inList)
         
         for eachIn in inListCt:
             matchedOut = satisfyMatch(eachIn , outListCt, sd) 
-        
+            print "matchedOut", matchedOut
+
             if matchedOut != -1:
                 leftCtgIndex, rightCtgIndex = eachIn[0], v.nodeIndex
                 inSuccReadsList = abunGraphLib.findPathBtwEndsFast(folderName, leftCtgIndex, rightCtgIndex, GContigRead, N1)
@@ -1128,7 +962,6 @@ def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
                     xResolvedList[nodeI].append([eachIn[0], matchedOut ])
                     
     return xResolvedList
-
 
 def formBRReolve(folderName, oldin, oldout, G, Grev, needTransform, N1):
     inList, outList = [],[]
@@ -1162,12 +995,23 @@ def filterConfidResolve(resolvedList):
         if len(tmpList) >= conThres:
             newResolvedList.append(key)
 
-    #noConflict = resolveConflict(abunHouseKeeper.getDistinct(resolvedList))
-    #newResolvedList = abunHouseKeeper.getDistinct(newResolvedList + noConflict)
+    if False:
+        noConflict = resolveConflict(abunHouseKeeper.getDistinct(resolvedList))
+        noConflict = abunHouseKeeper.getDistinct(noConflict)
+        newResolvedList = abunHouseKeeper.getDistinct(newResolvedList)
+        newResolvedList = abunHouseKeeper.getDistinct(intersect(newResolvedList , noConflict))
 
     return newResolvedList
 
-
+def intersect(a, b):
+    c = a +b 
+    c.sort()
+    returnList = []
+    for i in range(len(c)-1):
+        if c[i] == c[i+1]:
+            returnList.append(c[i])
+            
+    return returnList 
 
 def resolveConflict(combinedList):
     combinedDic = {}
@@ -1193,7 +1037,6 @@ def resolveConflict(combinedList):
             resolvedList.append(key)
 
     return resolvedList 
-
  
 def formConfirmReadResolve(folderName, inList, outList, G, Grev,  N1):
     #print "formConfirmReadResolve"
@@ -1209,9 +1052,7 @@ def formConfirmReadResolve(folderName, inList, outList, G, Grev,  N1):
     for eachin in inList:
         for eachout in outList:
             pathList = abunGraphLib.findAllPathK(eachin,eachout,G,3)
-
             for path in pathList:
-
                 if len(path) == 3 and path[1]>= N1 : 
                     R = path[1] 
                     confirmingReadList.append(R)
@@ -1262,8 +1103,6 @@ def formConfirmReadResolve(folderName, inList, outList, G, Grev,  N1):
 
     return resolvedList
 
-
-
 def resolveConflictX(listA, listB):
     resolvedList = [[] for i in range(len(listA))]
     print "len(listA), len(listB)", len(listA), len(listB)
@@ -1274,7 +1113,6 @@ def resolveConflictX(listA, listB):
         resolvedList[i] = tmpResolved 
 
     return resolvedList
-
 
 def xNodeBrResolving(Gnew, G, Grev, folderName, N1):
     #brResolvedListforX = []
@@ -1296,40 +1134,102 @@ def xNodeBrResolving(Gnew, G, Grev, folderName, N1):
 
     return xResolvedList 
 
+def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
 
+    '''
+    Algorithm: 
+    1)Load ContigReadGraph and form xResolvedGraph
+    2)Transitive reduction and remove double pointers
+    3)Bipartite resolution
+    4)xResolve 
+    5)Form gapLookUp 
+    6)Read contigs out from graph
+    7)CheckAns and get it done today again... 
+    '''
 
+    lenDic = IORobot.obtainLength(folderName, contigFilename+"_Double.fasta")
+    N1 = len(lenDic)
 
+    Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
+    Gnew.logEdges(folderName, "graphsurgery")
+    
+    Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic)
+    Gnew.logEdges(folderName, "BResolution")
+    
+    XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1 )
+    Gnew.logEdges(folderName, "XResolution")
 
+    readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilename, N1,contigReadGraph)
 
+def splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename ):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    '''
+    Input : repeatSpecification.txt , myCountDic.json, improved3.fasta, raw_reads.fasta
+    Output : abunsplit.fasta
+    
+    Algorithm : 
+    
+    1. Load data from various sources [various json files]
+    
+    2. For each repeat interior:
+        a) identify the abundances associated with in/out contigs
+        b) perform a split and record the split
+    
+    3. Use split results to generate contigs [may already exist in newPhasing.py ] 
+        a) use a graph to capture the split results 
+        b) use reads to fill in any gaps 
+        c) read out the contigs 
+    
+    '''
     
     
+    with open(folderName + 'myCountDic.json') as f:
+        myCountDic = json.load(f)
+        
+    #abunSplit(folderName, mummerLink, myCountDic, contigReadGraph, contigFilename,readsetFilename )    
+    #abunSplitWithXResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename )
+    abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename )
+    
+def mainFlow(folderName, mummerLink):
+    print "Hello world"
+    
+    contigFilename = "improved3"
+    readsetFilename = "phasingSeedName"
+    optTypeFileHeader = "phaseString"
+    contigReadGraph = "phaseStringGraph1"
+    repeatFilename = "phaseRepeat.txt"
+    repeatSpec = "repeatSpecification.txt"
+    optionToRun = "xphase"
+    
+        
+    if abunHouseKeeper.abunGlobalRunPickUp == "map" :
+        associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
+        readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph )
+        repeatFinder.identifyRepeat(folderName, mummerLink,contigFilename,contigReadGraph, repeatFilename, optionToRun )
+        
+    
+    if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" :
+        myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
+        
+    if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" or abunHouseKeeper.abunGlobalRunPickUp == "split" :
+        splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
+    
+        
+    os.system("cp selected_raw.part-* "+ folderName )
+    os.system("rm selected_raw.part-*")
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

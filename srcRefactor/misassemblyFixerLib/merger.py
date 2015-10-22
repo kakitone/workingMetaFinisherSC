@@ -4,12 +4,13 @@ from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver
 from ..repeatPhaserLib.finisherSCCoreLib import houseKeeper 
 import bisect
 import adaptorFix
+import mergerHelper
 
 mergerGlobalLCReads = "SR"
 
 class fixerRobot:
     def __init__(self):
-        print "fixerRobot"
+        #print "fixerRobot"
         self.toRunAdaptor = True
         self.toRunNoEmbedEnd = True
         self.toRunAggressive = False
@@ -57,7 +58,6 @@ High level interface  :
         3. Combine SC_n and LC_n and output it as contigs.fasta
 '''
     
-    
 def combineResults(folderName):
     commandList = []
     command = "cat "+ folderName + "LC_n.fasta "+ folderName + "SC_n.fasta > "
@@ -86,7 +86,6 @@ def mergeContigs(folderName, mummerLink, inputLCname):
     combineResults(folderName)
     
 '''        
-
 Subroutine 1: Obtain LC_n
     Input : SR.fasta, LR.fasta, LC.fasta
     Output : LC_n.fasta
@@ -97,11 +96,7 @@ Subroutine 1: Obtain LC_n
     
 
     Remark : criterion to break == imbalance of abundances
-
 '''
-
-
-
 
 def completelyEmbedSR2TR(eachsub, lenDic) :
     #  "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
@@ -127,7 +122,7 @@ def completelyEmbedSR2TR(eachsub, lenDic) :
             return True
         else:
             return False
-        
+
 
 def assignCoverage(dataitem, coveragePerContigsDic):
     contigName = dataitem[-2]
@@ -144,7 +139,6 @@ def assignCoverage(dataitem, coveragePerContigsDic):
             
     for i in range(startPt-1, endPt):
         coveragePerContigsDic[contigName][i] += 1
-    
     
 
 def alignSR2LC(folderName, mummerLink, incontigName):
@@ -354,8 +348,6 @@ def breakAcBkPts(contig, modifiedOutliners):
     return contigBreakDown
 
 
-    
-
 def breakAcBkPtsTwoSided(contig, modifiedOutlinersOld, folderName, mummerLink):
     contigBreakDown = []
     
@@ -519,8 +511,6 @@ def breakLC(folderName, inputName ):
     with open(folderName + "modifiedOutliners.json", 'w') as outfile:
         json.dump(breakPtsDic, outfile)
     
-    
-
 def fixLCMisassembly(folderName, mummerLink, inputName):
     print "fixLCMisassembly"
     # Remark : if done, one can also try on LR only data set to see if there 
@@ -567,8 +557,6 @@ def removeNeighbor(oldList, gapBtwBk ):
             oldItm = eachitem[1] 
         
     return modifiedList 
-
-
     
 def findPartner(seedList, oldList, gapLen):
     partnerList = []
@@ -738,7 +726,6 @@ def breakSC(folderName, mummerLink):
             brokenContigList = brokenContigList + [contigList[eachitem]]
             
     IORobot.writeSegOut(brokenContigList, folderName, "SC_n.fasta")
-     
 
 def fixSCMisassembly(folderName , mummerLink):
     print "fixSCMisassembly"
@@ -754,15 +741,13 @@ def fixSCMisassembly(folderName , mummerLink):
     breakSC(folderName, mummerLink)
     
     findRedundantSC(folderName, mummerLink)
-    
-        
+     
 '''
 Only Long reads and long contigs case:
 '''
 
 def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
-    
     if not mergerGlobalFixerRobot.tuneParaOnly:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self"+inputName, inputName+".fasta", inputName+".fasta", ""]], houseKeeper.globalParallel )
         
@@ -790,11 +775,21 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
     if mergerGlobalFixerRobot.toRunAggressive == False:
         if not mergerGlobalFixerRobot.tuneParaOnly:
             alignSR2LC(folderName, mummerLink, inputName)
-        breakLC(folderName, inputName)
-        blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
+
+        repeatIntervalDic = mergerHelper.repeatFinder(folderName, "LC_filtered")
+        blkDic = mergerHelper.groupCTest(folderName, repeatIntervalDic)
+        #breakLC(folderName, inputName)
+        #blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
+        #json_data = open(folderName + "blkDicNew.json", 'r')
+        #blkDic = json.load(json_data)
+
     else:
         blkDic = breakPtGettingHack2(folderName, newDataList, inputName)
+        
 
+    if True:
+        with open(folderName + "blkDic.json", 'w') as outfile:
+            json.dump(blkDic, outfile)
 
     LCList = IORobot.loadContigsFromFile(folderName, inputName+".fasta")
 
@@ -823,7 +818,6 @@ def withinBound(sep, mylist, bkpt ):
 
     return ck
 
-
 def getBreakPointFromDataList(folderName, dataList, inputLCname):
     g = 1000
     blkDic = {}
@@ -834,30 +828,42 @@ def getBreakPointFromDataList(folderName, dataList, inputLCname):
     breakPtsDic = json.load(json_data)
     sep = 5000
 
+    repeatDic = {}
+
     for key, items in groupby(dataList,itemgetter(-2) ):
         contigName = key
         newList =[]
         for eachitem in items:
             newList.append([eachitem[0], eachitem[1]])
         newList.sort()
-
+    ### Logging data for review
         bktmp = [0]
+        repeattmp = [0]
+
 
         if newList[0][0] > g :
+            repeattmp.append(newList[0][0])
             if withinBound(sep, breakPtsDic[contigName],newList[0][0]):
                 bktmp.append(newList[0][0])
 
         for i in range(len(newList)-1):
             if newList[i+1][0] > newList[i][1] + g:
+                repeattmp.append(newList[i+1][0])
                 if withinBound(sep, breakPtsDic[contigName],newList[i+1][0]):
                     bktmp.append(newList[i+1][0])
 
         bktmp.append(lenDic[contigName])
+        repeattmp.append(lenDic[contigName])
+        repeatDic[contigName] = repeattmp
 
+    ### End logging data for review
         blkDic[contigName] = bktmp
         print "contigName: "+ contigName
         print "bktmp:", bktmp
-        print "breakPtsDic[contigName]",breakPtsDic[contigName]
+        print "breakPtsDic[contigName]", breakPtsDic[contigName]
+        
+    with open(folderName + "repeatDic.json", 'w') as outfile:
+        json.dump(repeatDic, outfile)
 
     return blkDic
 
@@ -894,7 +900,6 @@ def breakPtGettingHack(folderName, dataList, inputLCname):
         #print "breakPtsDic[contigName]",breakPtsDic[contigName]
 
     return blkDic
-
 
 def breakPtGettingHack2(folderName, dataList, inputLCname):
     
@@ -937,7 +942,6 @@ def breakPtGettingHack2(folderName, dataList, inputLCname):
 
     return blkDic
 
-
 def mainFlow(newFolderName, newMummerLink):
 
     filterName = "LC_filtered"
@@ -948,7 +952,6 @@ def mainFlow(newFolderName, newMummerLink):
             adaptorFix.fixAdaptorSkip(newFolderName, newMummerLink, "LC.fasta", filterName) 
         else:
             os.system("cp "+ newFolderName + "LC.fasta "+newFolderName+filterName+".fasta")
-
 
     if mergerGlobalLCReads == "SR":
         mergeContigs(newFolderName , newMummerLink, filterName)

@@ -25,13 +25,10 @@ def obtainLength(folderName, fileName):
         
     lenDic[tmpName] = tmplen
     
-
     f.close()
     
     return lenDic
     
-
-
 def findContigLength(folderName, option):
     
     if option == "contigs":
@@ -97,9 +94,6 @@ def findContigLength(folderName, option):
 
     return contigLength
 
-
-
-
 def putListToFileO(folderName, sourceFileName, targetFileName, myList):
     f = open(folderName + targetFileName + ".txt", 'w')
     for eachitem in myList:
@@ -109,9 +103,6 @@ def putListToFileO(folderName, sourceFileName, targetFileName, myList):
     
     command = "perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV' " + folderName + targetFileName + ".txt " + folderName + sourceFileName + " > " + folderName + targetFileName + ".fasta"
     os.system(command)
-
-
-
 
 def writeToFile_Double1(folderName, fileName1, fileName2, option="contig"):
 
@@ -148,7 +139,6 @@ def writeToFile_Double1(folderName, fileName1, fileName2, option="contig"):
         
     f2.close()
 
-
 def loadContigsFromFile(folderName, fileName):
     f = open(folderName + fileName, 'r')
     tmp = f.readline().rstrip()
@@ -173,15 +163,13 @@ def loadContigsFromFile(folderName, fileName):
     f.close()
     return dataDic
 
-
-
 def writeToFile(f2, runningIndex, seq):
     f2.write(">Seg_" + str(runningIndex))
     f2.write('\n')
     f2.write(seq)
     f2.write('\n')
 
-# ## 5) Read the contigs out (I: startList, graphNodes, ; O:improved.fasta, openZone.txt)
+# ## 5) Read the contigs out (I: startList, graphNodes, ; O:improved.fasta, openZo`ne.txt)
 
 def useAlignToGetLen(eachnode, i , nameDic, orientation, myContigsDic, readNum, folderName , mummerLink):
     indexToAddNext = eachnode.nodeIndexList[i+1]
@@ -422,8 +410,6 @@ def truncateEndOfContigs(folderName, filenameIn, filenameOut, maxSize, lengthDic
     fSmaller.close()
     fmyFile.close()
 
-
-
 def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K):
     dataSet = []
     indexOfMum = ""
@@ -480,12 +466,7 @@ def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K)
     
     return dataSet
 
-
-
 ### read from overlap
-
-
-
 
 def writeSegOut(oldCtgList, folderName, fileout):
     ctgList = []
@@ -512,10 +493,16 @@ def checkIncluded(tmp, markedList):
     return isIncluded
 
 
+
+
 def align(leftSeg, rightSeg, folderName, mummerLink):
+    return alignWithName(leftSeg, rightSeg, folderName, mummerLink, "overlap")    
+
+
+def alignWithName(leftSeg, rightSeg, folderName, mummerLink, nameOfOut):
     overlap = [0, 0 ] 
     lLen = 0
-    f = open(folderName + "leftSeg.fasta", 'w')
+    f = open(folderName + nameOfOut+"leftSeg.fasta", 'w')
     f.write(">SegL\n")
     
     if len(leftSeg) < 50000:
@@ -527,7 +514,7 @@ def align(leftSeg, rightSeg, folderName, mummerLink):
     f.close()
     
     rLen = 0
-    f = open(folderName + "rightSeg.fasta", 'w')
+    f = open(folderName + nameOfOut+"rightSeg.fasta", 'w')
     f.write(">SegR\n")
     if len(rightSeg) < 50000:
         f.write(rightSeg)
@@ -540,8 +527,8 @@ def align(leftSeg, rightSeg, folderName, mummerLink):
     
     
     #alignerRobot.useMummerAlign(mummerLink, folderName, "overlap", "leftSeg.fasta", "rightSeg.fasta", False)
-    alignerRobot.useMummerAlign(mummerLink, folderName, "overlap", "leftSeg.fasta", "rightSeg.fasta", specialForRaw = False, specialName = "", refinedVersion= True)
-    dataList =  alignerRobot.extractMumData(folderName , "overlapOut")
+    alignerRobot.useMummerAlign(mummerLink, folderName, nameOfOut, nameOfOut+"leftSeg.fasta", nameOfOut+"rightSeg.fasta", specialForRaw = False, specialName = "", refinedVersion= True)
+    dataList =  alignerRobot.extractMumData(folderName , nameOfOut+"Out")
     
     thres = 10
     
@@ -634,6 +621,7 @@ def extractGraphToContigs(G, folderName, mummerLink, fileout, filein, gapContent
         if eachnode.nodeIndex < N1:
             if len(eachnode.nodeIndexList) > 0: 
                 myNodeIndexList = eachnode.nodeIndexList 
+                print myNodeIndexList
                 toCkIncludedList = []
                 tmp = []
                 
@@ -651,8 +639,9 @@ def extractGraphToContigs(G, folderName, mummerLink, fileout, filein, gapContent
                 
                 isIncluded  = checkIncluded(toCkIncludedList, markedList)
                 
+                #print isIncluded, toCkIncludedList, markedList
                 if not isIncluded :
-                    for eachitem in tmp: 
+                    for eachitem in toCkIncludedList: 
                         markedList[eachitem/2] = True
 
                     ctgtmpList = joinSeg(tmp, folderName, segLookUp, mummerLink, gapContentLookUpDic)
@@ -662,7 +651,8 @@ def extractGraphToContigs(G, folderName, mummerLink, fileout, filein, gapContent
     for i in range(len(markedList)):
         if markedList[i] == False: 
             missingSegments.append(segLookUp[2*i])
-    
+            #print i
+    #assert(False)
     print "len(missingSegments): " , len(missingSegments)
     
     ctgList = ctgList + missingSegments

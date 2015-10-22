@@ -6,8 +6,11 @@ import abunHouseKeeper
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import graphLib
 from finisherSCCoreLib import alignerRobot
+from finisherSCCoreLib import houseKeeper
 
+import json
 
+from multiprocessing import Pool
 class seqGraphNodeWt(graphLib.seqGraphNode):
     def __init__(self, nodeIndex):
         graphLib.seqGraphNode.__init__(self, nodeIndex)
@@ -185,11 +188,42 @@ class seqGraphDynamic(graphLib.seqGraph):
         self.clearVisitStatus()
         return canReach
     
-    
-    def condenseEdgeRemove(self, G_ContigRead):
+    def logEdges(self, folderName, stagename):
+        print "Logging edges"
+        logList = []
+        
+        if stagename == "XResolution":
+            mapDummyToRealDic =self.readInJSON(folderName, "mapDummyToRealDic.json")
+        else:
+            mapDummyToRealDic = {}
+
+        for eachnode in self.graphNodesList:
+            tmpNodeIndexList = []
+            for kk in eachnode.nodeIndexList:
+                if kk >= self.N1:
+                    tmpNodeIndexList += mapDummyToRealDic[str(kk-self.N1)][1]
+                else:
+                    tmpNodeIndexList += [kk]
+
+            if len(tmpNodeIndexList) >= 2:
+                for i in range(len(tmpNodeIndexList)-1):
+                    currentName = tmpNodeIndexList[i]
+                    nextName =  tmpNodeIndexList[i+1]
+                    cName =  abunHouseKeeper.parseIDToName(currentName,'C',0)
+                    nName =  abunHouseKeeper.parseIDToName(nextName,'C',0)
+                    logList.append([cName, nName])
+
+        with open( folderName + stagename + ".json", 'w') as f:
+            json.dump(logList, f)    
+
+    def condenseEdgeRemove(self, G_ContigRead, folderName, mummerLink, contigFilename):
         print "condenseEdgeRemove"
         thresPass = 100
+        thresForStrangeCut = 5000
+        ### kkdebug
 
+        toRemoveList = []
+        
         for eachnode in self.graphNodesList:
             if len(eachnode.nodeIndexList) > 0:
                 if len(eachnode.listOfNextNodes) ==1  :
@@ -198,20 +232,50 @@ class seqGraphDynamic(graphLib.seqGraph):
                     if len(nextNode.listOfPrevNodes) == 1 : 
                         currentName = eachnode.nodeIndex
                         nextName =  nextNode.nodeIndex
-                        print "Remove", currentName, nextName
-                        contigReadPaths = findAllPathK(currentName,nextName, G_ContigRead, 3)
-                        ctr = 0
+
+                        contigReadPaths = findAllPathK(currentName,nextName, G_ContigRead, 5)
+
+                        cName =  abunHouseKeeper.parseIDToName(currentName,'C',0)
+                        nName =  abunHouseKeeper.parseIDToName(nextName,'C',0)
+
+                        noGoNext = self.readInJSON(folderName, "noGoNext.json")
+                        noGoPrev = self.readInJSON(folderName, "noGoPrev.json")
+
+                        overlap = [-1, -1]
+                        ctr = 0 
+
                         for eachpath in contigReadPaths:
                             if len(eachpath) > 2: 
                                 ctr = ctr + 1 
-                                print eachpath
+                                
+                            elif len(eachpath) == 2:     
+                                
+                                contigName = cName
+                                leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
 
-                        print "ctr", ctr
-                        if ctr <= thresPass:
+                                contigName = nName
+                                rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+                                
+                                overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+
+
+                        if ctr <= thresPass and  (cName in noGoNext or nName in noGoPrev or overlap[0] > thresForStrangeCut ):
+                    
                             self.removeEdge(currentName, nextName)
+                            toRemoveList.append([currentName, nextName])
+
+
+        ### kkdebug
+        #with open( "dataFolder/toRemoveList.json", 'w') as f:
+        #    json.dump(toRemoveList, f)    
 
         self.findAdjList()
-            
+
+    def readInJSON(self, folderName, filename):
+
+        json_data = open(folderName + filename, 'r')
+        dataItem = json.load(json_data)
+        return dataItem
     
     def transitiveReduction(self,folderName, mummerPath, contigFile, readFile, G_ContigRead):
         for i in range(self.N1):
@@ -276,18 +340,25 @@ class seqGraphDynamic(graphLib.seqGraph):
             self.insertEdge(u,v,1997)
     
 
-    def bipartiteLocalResolve(self, resolvedList, inList, outList):
+    def bipartiteLocalResolve(self, resolvedList, inList, outList, folderName):
 
-        for u in inList:
-            self.clearOut(u/2)
+        #noGoNext = self.readInJSON(folderName, "noGoNext.json")
+        #noGoPrev = self.readInJSON(folderName, "noGoPrev.json")
 
-        for v in outList:
-            self.clearIn(v/2)
+        if len(resolvedList) > 0:
+            for u in inList:
+                self.clearOut(u/2)
 
-        for e in resolvedList:
-            u, v =e[0], e[-1]
+            for v in outList:
+                self.clearIn(v/2)
 
-            self.insertEdge(u,v,1997)
+            for e in resolvedList:
+                u, v =e[0], e[-1]
+                cName =  abunHouseKeeper.parseIDToName(u,'C',0)
+                nName =  abunHouseKeeper.parseIDToName(v,'C',0)
+
+                #if not cName in noGoNext and not nName in noGoPrev:  
+                self.insertEdge(u,v,1997)
 
 
     def symGraph(self):
@@ -337,8 +408,6 @@ class seqGraphDynamic(graphLib.seqGraph):
                     self.xResolvedSimplifiedList.append([inNode, i])
                     self.xResolvedSimplifiedList.append([i, outNode])
                 else:
-
-
                     self.graphNodesList.append(graphLib.seqGraphNode(self.N1+self.runningCtr))
                     
                     if False:
@@ -356,8 +425,6 @@ class seqGraphDynamic(graphLib.seqGraph):
                         self.removeEdge(inNode,i )
                         self.removeEdge(i, outNode)
 
-
-
                     self.insertEdge(inNode, self.N1 + self.runningCtr, 1997)
                     self.insertEdge(self.N1 + self.runningCtr, outNode, 1997)
 
@@ -365,11 +432,7 @@ class seqGraphDynamic(graphLib.seqGraph):
                     
                     self.xResolvedSimplifiedList.append([inNode, self.N1 + self.runningCtr])
                     self.xResolvedSimplifiedList.append([self.N1 + self.runningCtr, outNode])
-                    
-
-                    
                     self.runningCtr = self.runningCtr + 1
-                
                 
 
 def findMyComp(u):
@@ -476,10 +539,6 @@ def markReachableIndices(G, Grev, rIn, rOut, N1):
     for i in range(len(Grev.graphNodesList)):
         if len(Grev.graphNodesList[i].visitLabelList) > 0:
             G.graphNodesList[i].visitLabelList = G.graphNodesList[i].visitLabelList + Grev.graphNodesList[i].visitLabelList  
-    
-    
-        
-        
 
 def formReverseGraph(G):
     nNode = len(G.graphNodesList)
@@ -490,7 +549,6 @@ def formReverseGraph(G):
             if haveInserted:      
                 Grev.insertEdge(j, i, 100)
     return Grev
-
 
 def formReverseGraphFast(G):
     nNode = len(G.graphNodesList)
@@ -531,7 +589,6 @@ def markInsideNodes(G, kkIn, kkOut):
     return singleMissList, allPassList
 
 
-
 def checkMiss(myNode, rIn, rOut):
     index = 1997
     myList = myNode.visitLabelList
@@ -544,7 +601,6 @@ def checkMiss(myNode, rIn, rOut):
             return i
             break
     return index
-
 
  
 def markStartEndNodes(G, rIn, rOut, singleMissList, allPassList):
@@ -731,8 +787,6 @@ def checkPathLength(path, G, N1, folderName):
                     overlapLength = overlapLength + eachnext[1]
                     break 
     print sumLength, overlapLength, sumLength - overlapLength
-                
-
 
 def findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1):
     
@@ -852,44 +906,95 @@ def decideCut(folderName, mummerPath):
 
 
 
+def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
+    p = Pool(processes=houseKeeper.globalParallel)
+    results = []
+    
+    for eachmatchpair in resolvedList:
+        results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
+
+    
+    outputlist = [itemkk.get() for itemkk in results]
+    print  len(outputlist)
+    p.close()
+
+    return outputlist
 
 
+def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
 
+    #print eachmatchpair
+    leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
+    
+    succReadsList = []
+    G = seqGraphWt(0)
+    G.loadFromFile(folderName, contigReadGraph)
+    succReadsList = BFS(leftCtgIndex,rightCtgIndex, G, N1)
 
+    if len(succReadsList) > 0:
+        succReadsList.pop(0)
+        succReadsList.pop(-1)
+    else:
+        print "interesting item for future study"
 
+    print "succReadsList" , succReadsList
+    
+    if len(succReadsList) == 0:
+        contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
+        leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
 
+        contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
+        rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        
+        print "overlap contig : ", overlap
+        
+        leftEnd = len(leftSeg) - overlap[0]
+        middleContent = ""
+        
+    else:
+        
+        contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
+        print contigName
+        leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
+        readName = abunHouseKeeper.parseIDToName(succReadsList[0], 'R', N1)
+        print readName
+        rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        
+        print "overlap start read : ", overlap
+        
+        leftEnd = len(leftSeg) - overlap[0]
+        
+        middleContent = ""
+        
+        for i in range(len(succReadsList)-1):
+            readName = abunHouseKeeper.parseIDToName(succReadsList[i], 'R', N1)
+            leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+            readName = abunHouseKeeper.parseIDToName(succReadsList[i+1], 'R', N1)
+            rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+            
+            overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+            print "overlap middle read : ", overlap
+            middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]] 
+        
+        
+        readName = abunHouseKeeper.parseIDToName(succReadsList[-1], 'R', N1)
+        leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+        contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
+        rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
 
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        print "overlap end read : ", overlap
+        
+        middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return [leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent]
+    
 

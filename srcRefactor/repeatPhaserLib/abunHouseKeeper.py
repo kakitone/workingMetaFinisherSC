@@ -28,10 +28,13 @@ class abunSplitParameterRobot():
     def parameterForGraphSurgery(self):
         self.edgeThres = 1
         self.kthres = 3
-
         self.toRunCondenseRemove = True
         self.toRunTransitive = True
         self.toRunDoubltPtr = True
+
+        self.thresMiddleContig = 30
+        self.lenthresMiddleContig = -1
+        self.bestMatchContigOnly = True
 
 
     def parameterForBResolve(self):
@@ -52,7 +55,7 @@ class abunSplitParameterRobot():
 
         self.BRThresX = -1
         self.AbunLowerX = -1
-        self.AbunUpperX = -1
+        self.AbunUpperX = 1.75
 
     def loadData(self, initial_data):
         canLoad = True
@@ -72,7 +75,7 @@ class abunSplitParameterRobot():
                 canLoad = False
         return canLoad
 
-  
+
 abunGlobalSplitParameterRobot = abunSplitParameterRobot()
 
 
@@ -114,8 +117,6 @@ def parseEdgeNameToID(name, mytype):
         
     return id 
 
-
-
 def parseIDToName(id, mytype, numDoubleContigs):
 
     if mytype == 'C':
@@ -139,7 +140,6 @@ def getDistinct(myList):
         newList.append(key)
     
     return newList
-
 
 def filterData(dataList, lenDic):
     newDataList = []
