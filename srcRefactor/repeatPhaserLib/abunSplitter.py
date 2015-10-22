@@ -1154,6 +1154,8 @@ def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  con
     Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
     Gnew.logEdges(folderName, "graphsurgery")
     
+    Gnew.reportEdge()
+    assert(False)
     
     Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mummerLink)
     Gnew.logEdges(folderName, "BResolution")

@@ -986,17 +986,14 @@ def XResolvePreparation(Gnew, GContigRead, Grev, folderName, myCountDic, lenDic,
 			#xnodeName = "Segkk" + str(nodeI/2)
 			xnodeName = "Segkk" + str(nodeI/2)
 
-
 			IORobot.writeSegOut([contigDic[abunHouseKeeper.parseIDToName(nodeI,'C',0)]], folderName, "intermediate.fasta")
 
 			RList = RListDic[xnodeName]
 			IORobot.putListToFileO(folderName, "raw_reads.fasta", "RList", RList)
 			IORobot.writeToFile_Double1(folderName, "RList.fasta", "RList_Double.fasta", "contig")
 
-
 			score, matching, contentForBetterInteriorToFlank = EMFlow(folderName, mummerLink)
 			ansList = []
-
 
 			if 1/score > 1.001 : 
 				for eachsub in matching:
