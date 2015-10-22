@@ -180,7 +180,7 @@ def computeLambdaList(folderName, prevIteration, readMatching, constants):
 	
 	return lambdas 
 
-def computeInteriorList(folderName , prevIteration, readMatching, constants, isDebug):
+def computeInteriorList(folderName , prevIteration, readMatching, constants, isDebug, mummerLink):
 	'''
 	Input : prevIteration = [lambdas, templates, score] , constants = [basesMappedToEachContig], readMatching = [read2templateDic, template2readDic]
 	Output : interiors = [newTemplates]
@@ -193,7 +193,7 @@ def computeInteriorList(folderName , prevIteration, readMatching, constants, isD
 	2) Format and return the interiors
 	'''
 	if not  isDebug:
-		interiors = chopUpReads(folderName)
+		interiors = chopUpReads(folderName, mummerLink)
 	else:
 		interiors  = IORobot.readContigsFromFile(folderName, "interiors.fasta")
 		
@@ -320,7 +320,7 @@ class consensusBins(object):
 
 		return None
 
-def chopUpReads(folderName):
+def chopUpReads(folderName, mummerLink):
 	print "chopUpReads"
 	interiors = []
 	
@@ -366,7 +366,7 @@ def chopUpReads(folderName):
 		print "numberOfBins", numberOfBins
 		bins = [consensusBins(j, begin + j*ell, min(begin +ell*(j+1), end)) for j in range(numberOfBins)]
 
-		temp2readAlignDic = loadAlignment(folderName, nameOfTemplate, template2readDic[nameOfTemplate])
+		temp2readAlignDic = loadAlignment(folderName, nameOfTemplate, template2readDic[nameOfTemplate],mummerLink)
 		#for eachdebug in temp2readAlignDic:
 		#	print temp2readAlignDic[eachdebug]
 		
@@ -403,7 +403,7 @@ def chopUpReads(folderName):
 	IORobot.writeSegOut(interiors, folderName, "interiors.fasta")	
 	return interiors
 
-def loadAlignment(folderName, nameOfTemplate, associatedReadAlignList):
+def loadAlignment(folderName, nameOfTemplate, associatedReadAlignList,mummerLink):
 
 
 	temp2readAlignDic = {}
@@ -1124,7 +1124,7 @@ def EMFlow(folderName, mummerLink):
 		for iterationI in range(numberOfIterations):	
 			readMatching = computeReadAssociation(folderName, prevIteration, constants, isDebug, mummerLink)
 			lambdas = computeLambdaList(folderName, prevIteration, readMatching, constants)
-			interiors = computeInteriorList(folderName , prevIteration, readMatching, constants, isDebug )
+			interiors = computeInteriorList(folderName , prevIteration, readMatching, constants, isDebug, mummerLink )
 			score = computeScore(folderName, eachMatching, lambdas, interiors, readMatching, constants, isDebug, mummerLink)
 			prevIteration = [lambdas, interiors, score] 
 
