@@ -759,7 +759,7 @@ def initMatching(folderName, eachMatching):
 
 	thres = 20000
 
-	noiselessTemplatesDic = IORobot.loadContigsFromFile(folderName, "intermediateNoiseless.fasta")
+	#noiselessTemplatesDic = IORobot.loadContigsFromFile(folderName, "intermediateNoiseless.fasta")
 	noiselesstemplates = []
 
 	for eachpair in eachMatching:		
