@@ -166,19 +166,18 @@ def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFold
     embedContig2ReadDic, read2EmbedContigDic = {}, {}
 
     for key, items in groupby(dataList, itemgetter(-2)):
-
-            isEmbedded = False
-            for eachitem in items:
+        isEmbedded = False
+        for eachitem in items:
             print eachitem
-                    if eachitem[4] > lenDic[key]-300 :
-                            isEmbedded = True
-                            tmpItem = eachitem
+            if eachitem[4] > lenDic[key]-300 :
+                    isEmbedded = True
+                    tmpItem = eachitem
 
-            if isEmbedded:
-                    count = count + 1
-                    readName = tmpItem[-1]
-                    embedContig2ReadDic[key] = readName
-                    read2EmbedContigDic[readName] = key
+        if isEmbedded:
+            count = count + 1
+            readName = tmpItem[-1]
+            embedContig2ReadDic[key] = readName
+            read2EmbedContigDic[readName] = key
 
 
     print "len(embedContig2ReadDic)", len(embedContig2ReadDic)
