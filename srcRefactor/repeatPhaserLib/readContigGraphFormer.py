@@ -194,7 +194,7 @@ def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFold
             if idNode < N1:
                 G.insertEdge(idNode, contigIndex, wt)
 
-        for eachnext in G.graphNodesList[readInex].listOfNextNodes:
+        for eachnext in G.graphNodesList[readIndex].listOfNextNodes:
             idNode, wt = eachnext[0], eachnext[1]
             if idNode < N1:
                 G.insertEdge(contigIndex,idNode,  wt)
