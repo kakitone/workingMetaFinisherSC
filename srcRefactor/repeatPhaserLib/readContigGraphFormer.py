@@ -182,8 +182,7 @@ def formExtraEdges(folderName,optTypeFileHeader, contigFilename, G, N1):
     for contigName in embedContig2ReadDic:
         readName = embedContig2ReadDic[contigName]
     
-        readIndex, contigIndex = abunHouseKeeper.parseEdgeNameToID(readName, 'R') \
-                                abunHouseKeeper.parseEdgeNameToID(contigName, 'C')
+        readIndex, contigIndex = abunHouseKeeper.parseEdgeNameToID(readName, 'R'), abunHouseKeeper.parseEdgeNameToID(contigName, 'C')
 
         for eachprev in G.graphNodesList[readInex].listOfPrevNodes:
             idNode, wt = eachprev[0], eachprev[1]
