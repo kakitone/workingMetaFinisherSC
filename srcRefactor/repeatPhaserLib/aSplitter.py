@@ -75,7 +75,7 @@ else:
     abunHouseKeeper.abunGlobalRRDisable = True
 
 
-if args['pickup'] in [ "map", "count", "split"] :
+if args['pickup'] in [ "map", "count", "split", "graph"] :
     abunHouseKeeper.abunGlobalRunPickUp = args['pickup']
 
 if args['runemalgo'] == "True":

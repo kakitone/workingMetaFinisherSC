@@ -1222,6 +1222,7 @@ def mainFlow(folderName, mummerLink):
         splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
 
     if abunHouseKeeper.abunGlobalRunPickUp == "graph":
+        print "Graph here"
         readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph, False)
         splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
     
