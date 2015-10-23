@@ -150,7 +150,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
 
     Gnew = formExtraEdges(folderName,optTypeFileHeader, contigFilename, G, N1)
     
-    Gnew .saveToFile(folderName, graphName)
+    Gnew.saveToFile(folderName, graphName)
     
     print "len(Gnew.graphNodesList)", len(Gnew .graphNodesList)
     
@@ -182,7 +182,7 @@ def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFold
 
     print "len(embedContig2ReadDic)", len(embedContig2ReadDic)
 
-    assert(False)
+    #assert(False)
 
     for contigName in embedContig2ReadDic:
         readName = embedContig2ReadDic[contigName]
@@ -203,7 +203,7 @@ def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFold
     return G
 
 
-formExtraEdges()
+#formExtraEdges()
 
 
 
