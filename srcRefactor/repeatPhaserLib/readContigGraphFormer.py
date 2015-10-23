@@ -189,7 +189,7 @@ def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFold
     
         readIndex, contigIndex = abunHouseKeeper.parseEdgeNameToID(readName, 'R'), abunHouseKeeper.parseEdgeNameToID(contigName, 'C')
 
-        for eachprev in G.graphNodesList[readInex].listOfPrevNodes:
+        for eachprev in G.graphNodesList[readIndex].listOfPrevNodes:
             idNode, wt = eachprev[0], eachprev[1]
             if idNode < N1:
                 G.insertEdge(idNode, contigIndex, wt)
