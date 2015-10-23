@@ -6,6 +6,7 @@ abunGlobalAvoidrefine = True
 abunGlobalReadSearchDepth = 0
 abunGlobalRRDisable = True
 abunGlobalRunPickUp = "map"
+abunGlobalRunEM = False
 
 class abunSplitParameterRobot():
     def __init__(self):

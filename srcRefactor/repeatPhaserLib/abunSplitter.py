@@ -732,7 +732,7 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mumme
 
         for eachitem in repeatPairs:
             inList, outList = eachitem[0], eachitem[1]
-            if False:
+            if not abunHouseKeeper.abunGlobalRunEM:
                 resolvedList, brResolvedList = [], [] 
 
                 if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAbunB:
@@ -795,9 +795,10 @@ def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1, mummer
 
         Grev = abunGraphLib.formReverseGraphFast(G)
         
-        xResolvedList, brResolvedListforX = [[] for i in range(N1)], [[] for i in range(N1)]
         
-        if False:
+        
+        if not abunHouseKeeper.abunGlobalRunEM:
+            xResolvedList, brResolvedListforX = [[] for i in range(N1)], [[] for i in range(N1)]
             if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAbunX:
                 if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerX > 0:
                     abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLowerX
@@ -813,8 +814,10 @@ def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1, mummer
                     abunHouseKeeper.abunGlobalSplitParameterRobot.BRThres = abunHouseKeeper.abunGlobalSplitParameterRobot.BRThresX
 
                 brResolvedListforX = xNodeBrResolving(Gnew, G,Grev, folderName, N1)
-  
-        combinedList = xNodeEMResolving(Gnew, G, Grev, folderName, myCountDic, lenDic, N1, mummerLink)
+
+            combinedList = resolveConflictX(xResolvedList, brResolvedListforX) 
+        else:
+            combinedList = xNodeEMResolving(Gnew, G, Grev, folderName, myCountDic, lenDic, N1, mummerLink)
         
         print "combinedList", combinedList
 
@@ -1154,7 +1157,7 @@ def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  con
     Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
     Gnew.logEdges(folderName, "graphsurgery")
     
-    Gnew.reportEdge()
+    #Gnew.reportEdge()
     #assert(False)
 
     Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mummerLink)
@@ -1216,6 +1219,10 @@ def mainFlow(folderName, mummerLink):
         myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
         
     if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" or abunHouseKeeper.abunGlobalRunPickUp == "split" :
+        splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
+
+    if abunHouseKeeper.abunGlobalRunPickUp == "graph":
+        readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph, False)
         splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
     
         
