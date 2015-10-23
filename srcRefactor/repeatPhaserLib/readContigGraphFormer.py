@@ -155,7 +155,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     print "len(Gnew.graphNodesList)", len(Gnew .graphNodesList)
     
     
-def formExtraEdges(folderName,optTypeFileHeader, contigFilename, G, N1):
+def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFolderBackup/",optTypeFileHeader="phaseString", contigFilename="improved3", G = [], N1 = 0):
 
     dataList = alignerRobot.extractMumData(folderName, optTypeFileHeader + "CR" + "Out")
     dataList.sort(key = itemgetter(-2))
@@ -181,6 +181,8 @@ def formExtraEdges(folderName,optTypeFileHeader, contigFilename, G, N1):
 
     print "len(embedContig2ReadDic)", len(embedContig2ReadDic)
 
+    assert(False)
+
     for contigName in embedContig2ReadDic:
         readName = embedContig2ReadDic[contigName]
     
@@ -200,7 +202,7 @@ def formExtraEdges(folderName,optTypeFileHeader, contigFilename, G, N1):
     return G
 
 
-
+formExtraEdges()
 
 
 
