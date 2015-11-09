@@ -690,6 +690,7 @@ def DFS(G, x, N1, startIndex, endIndex, mypath):
         if G.graphNodesList[x].visited == False:
             G.graphNodesList[x].visited = True
             for eachChild in G.graphNodesList[x].listOfNextNodes:
+                print "startIndex, endIndex, eachChild[0], x", startIndex, endIndex, eachChild[0], x
                 returnpath = DFS(G, eachChild[0], N1, startIndex, endIndex, mypath + [x])
                 if returnpath != None :
                     return returnpath
