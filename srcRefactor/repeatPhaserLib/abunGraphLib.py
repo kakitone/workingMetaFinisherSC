@@ -686,7 +686,7 @@ def markFlankingRegion(G, rIn, rOut, myStartIndex, myEndIndex, N1):
 
 def DFS(G, x, N1, startIndex, endIndex, mypath):
     
-    if x >= N1 or x == startIndex and len(mypath) < 5:
+    if x >= N1 or x == startIndex and len(mypath) < 3:
         if G.graphNodesList[x].visited == False:
             G.graphNodesList[x].visited = True
             for eachChild in G.graphNodesList[x].listOfNextNodes:
