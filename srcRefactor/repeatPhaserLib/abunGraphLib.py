@@ -686,12 +686,16 @@ def markFlankingRegion(G, rIn, rOut, myStartIndex, myEndIndex, N1):
 
 def DFS(G, x, N1, startIndex, endIndex, mypath):
     
-    if x >= N1 or x == startIndex and len(mypath) < 7:
+    if x >= N1 or x == startIndex and len(mypath) < 5:
         if G.graphNodesList[x].visited == False:
             G.graphNodesList[x].visited = True
             for eachChild in G.graphNodesList[x].listOfNextNodes:
-                print "startIndex, endIndex, eachChild[0], x", startIndex, endIndex, eachChild[0], x
-                returnpath = DFS(G, eachChild[0], N1, startIndex, endIndex, mypath + [x])
+                #print "startIndex, endIndex, eachChild[0], x", startIndex, endIndex, eachChild[0], x
+                if G.graphNodesList[eachChild[0]].visited == False:
+                    returnpath = DFS(G, eachChild[0], N1, startIndex, endIndex, mypath + [x])
+                else:
+                    returnpath = None
+
                 if returnpath != None :
                     return returnpath
                 
