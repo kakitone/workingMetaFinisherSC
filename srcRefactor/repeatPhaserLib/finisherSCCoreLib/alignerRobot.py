@@ -104,7 +104,7 @@ def zeropadding(i):
         tmpi = str(i)
     return tmpi
    
-      
+
 def calculate(func, args):
     func(*args)
 
@@ -123,7 +123,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
         for eachitem in workerList:
             outputName, referenceName, queryName, specialName = eachitem
             results.append((useMummerAlign, (mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName, refinedVersion)))
-    print len(results)
+        print len(results)
         p.map_async(calculatestar, results, chunksize=max(1,len(results)/nProc))
         p.close()
         p.join()
