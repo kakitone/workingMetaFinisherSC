@@ -27,6 +27,7 @@ if me == 0 :
 	for i in range(1, nproc):
 		comm.Recv(randNum, ANY_SOURCE)
 		total += randNum[0]
+	print total
 
 
 else: 
