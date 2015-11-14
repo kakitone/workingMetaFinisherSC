@@ -27,7 +27,8 @@ if me == 0 :
 	for i in range(1, nproc):
 		comm.Recv(randNum, ANY_SOURCE)
 		total += randNum[0]
-	print total
+	
+	print "This is master : ", total
 
 
 else: 
@@ -35,6 +36,6 @@ else:
 	# Perform alignment according to the , when done, 
 	# send a signal to the master
 	randNum = numpy.random.random_sample(1)
-	print "Process", rank, "drew the number", randNum[0]
+	print "Process", me, "drew the number", randNum[0]
 	comm.Send(randNum, dest=0)
 
