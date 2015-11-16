@@ -1,6 +1,8 @@
 import abunSplitter
 
 from finisherSCCoreLib import houseKeeper
+from finisherSCCoreLib import alignerRobot
+
 import time
 import argparse
 import abunHouseKeeper
@@ -24,89 +26,128 @@ parser.add_argument('-rd', '--RRDisable', help= 'Whether one should disable Read
 parser.add_argument('-pk', '--pickup', help= 'where to run ASplitter, map/count/split/graph', required=False)
 
 parser.add_argument('-em', '--runemalgo', help= 'whether to run EM for splitting repeats', required=False)
+parser.add_argument('-mpi', '--runmpi', help= 'whether to run MPI', required=False)
+parser.add_argument('-sc', '--segmentcount', help= 'number of segments to break', required=False)
+
+
 
 parser.add_argument('-op', '--option', help='File of parameter list (input is opa=true opb=false)', required=False)
 
 args = vars(parser.parse_args())
 
-print "args", args
-pathExists, newFolderName, newMummerLink = houseKeeper.checkingPath(args['folderName'], args['mummerLink'])
 
-if args['fast'] == "True":
-    houseKeeper.globalFast = True
+
+if args['runmpi'] == "True":
+    houseKeeper.globalRunMPI = True
 else:
-    houseKeeper.globalFast = False
-
-if args['parallel'] != None:
-    houseKeeper.globalParallel = int(args['parallel'])
-else:
-    houseKeeper.globalParallel = 20
+    houseKeeper.globalRunMPI = False
 
 
-if args['large'] == "True":
-    houseKeeper.globalLarge = True
-else:
-    houseKeeper.globalLarge = False
+me = 0 
 
+if houseKeeper.globalRunMPI == True:
+    from mpi4py import MPI
+    from mpi4py.MPI import ANY_SOURCE
+    comm = MPI.COMM_WORLD
+    me = comm.Get_rank()
+    nproc = comm.Get_size()
 
-if args['avoidrefine'] == "False":
-    abunHouseKeeper.abunGlobalAvoidrefine = False
-else:
-    abunHouseKeeper.abunGlobalAvoidrefine = True
+if me ==0 :
+    print "args", args
+    pathExists, newFolderName, newMummerLink = houseKeeper.checkingPath(args['folderName'], args['mummerLink'])
 
-
-if args['readsearch'] != None:
-    abunHouseKeeper.abunGlobalReadSearchDepth = int(args['readsearch']) 
-else:
-    abunHouseKeeper.abunGlobalReadSearchDepth = 0
-
-
-if args['replace'] != None : 
-    if  args['replace'] == 'skip':
-        print "skip copy"
+    if args['segmentcount'] != None:
+        houseKeeper.globalParallelFileNum = int(args['segmentcount'])
     else:
-        abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
+        houseKeeper.globalParallelFileNum = 20
+
+    if args['fast'] == "True":
+        houseKeeper.globalFast = True
+    else:
+        houseKeeper.globalFast = False
+
+    if args['parallel'] != None:
+        houseKeeper.globalParallel = int(args['parallel'])
+    else:
+        houseKeeper.globalParallel = 20
+
+
+    if args['large'] == "True":
+        houseKeeper.globalLarge = True
+    else:
+        houseKeeper.globalLarge = False
+
+
+    if args['avoidrefine'] == "False":
+        abunHouseKeeper.abunGlobalAvoidrefine = False
+    else:
+        abunHouseKeeper.abunGlobalAvoidrefine = True
+
+
+    if args['readsearch'] != None:
+        abunHouseKeeper.abunGlobalReadSearchDepth = int(args['readsearch']) 
+    else:
+        abunHouseKeeper.abunGlobalReadSearchDepth = 0
+
+
+    if args['replace'] != None : 
+        if  args['replace'] == 'skip':
+            print "skip copy"
+        else:
+            abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
+    else:
+        abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
+
+    if args['RRDisable'] == "False":
+        abunHouseKeeper.abunGlobalRRDisable = False
+    else:
+        abunHouseKeeper.abunGlobalRRDisable = True
+
+
+    if args['pickup'] in [ "map", "count", "split", "graph"] :
+        abunHouseKeeper.abunGlobalRunPickUp = args['pickup']
+
+    if args['runemalgo'] == "True":
+        abunHouseKeeper.abunGlobalRunEM = True
+    else:
+        abunHouseKeeper.abunGlobalRunEM = False
+
+    if args['option'] != None:
+        settingDataCombo = args['option'].split()
+        settingDic = {}
+
+        for eachitem in settingDataCombo:
+            tmp = eachitem.split('=')
+            settingDic[tmp[0]] = tmp[1]
+
+        canLoad = abunHouseKeeper.abunGlobalSplitParameterRobot.loadData(settingDic)
+    else:
+        canLoad = True    
+
+    if canLoad:
+        settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+        with open(newFolderName + "option.json", 'w') as f:
+            json.dump(settingDic, f)
+
+
+    if pathExists and canLoad:
+        abunSplitter.mainFlow(newFolderName, newMummerLink)
+
+
+    else:
+        print "Sorry. The above folders or files are missing or options are not correct. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
+
+    print  "Time", time.time() - t0
+
 else:
-    abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
+    while True:
+        data = comm.recv(source=0)
+        #print "receiver", me ,"iteration" ,i, data[-2]
+        mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion= data
+        alignerRobot.useMummerAlign(mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion)
 
-if args['RRDisable'] == "False":
-    abunHouseKeeper.abunGlobalRRDisable = False
-else:
-    abunHouseKeeper.abunGlobalRRDisable = True
+        comm.send(data, dest=0)
 
+    
 
-if args['pickup'] in [ "map", "count", "split", "graph"] :
-    abunHouseKeeper.abunGlobalRunPickUp = args['pickup']
-
-if args['runemalgo'] == "True":
-    abunHouseKeeper.abunGlobalRunEM = True
-else:
-    abunHouseKeeper.abunGlobalRunEM = False
-
-
-if args['option'] != None:
-    settingDataCombo = args['option'].split()
-    settingDic = {}
-
-    for eachitem in settingDataCombo:
-        tmp = eachitem.split('=')
-        settingDic[tmp[0]] = tmp[1]
-
-    canLoad = abunHouseKeeper.abunGlobalSplitParameterRobot.loadData(settingDic)
-else:
-    canLoad = True    
-
-if canLoad:
-    settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
-    with open(newFolderName + "option.json", 'w') as f:
-        json.dump(settingDic, f)
-
-
-if pathExists and canLoad:
-    abunSplitter.mainFlow(newFolderName, newMummerLink)
-
-
-else:
-    print "Sorry. The above folders or files are missing or options are not correct. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
-
-print  "Time", time.time() - t0
+    

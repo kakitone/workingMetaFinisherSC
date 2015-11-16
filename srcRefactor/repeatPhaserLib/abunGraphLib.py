@@ -994,7 +994,6 @@ def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph,
         contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
         rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
         
-
         overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
         print "overlap end read : ", overlap
         

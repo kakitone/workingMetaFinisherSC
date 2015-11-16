@@ -16,7 +16,10 @@ aprun -n 24 python-mpi ./mpiStarter.py
 @ Commandlnie 
 qsub runnit
 
+@ Local environment
+mpiexec  -n 5 python  srcRefactor/repeatPhaserLib/mpiStarter.py 
 '''
+
 
 randNum = numpy.zeros(1)
 
@@ -27,11 +30,20 @@ if me == 0 :
 	for i in range(1, nproc):
 		comm.Recv(randNum, ANY_SOURCE)
 		total += randNum[0]
-	
+
 	print "This is master : ", total
+
+	### Run usual routines 
+	
+
+	
 
 
 else: 
+	
+	### Run each of the alignment steps. 
+	
+	
 	print "me, nproc", me, nproc
 	# Perform alignment according to the , when done, 
 	# send a signal to the master
