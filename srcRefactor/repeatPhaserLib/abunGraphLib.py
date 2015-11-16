@@ -912,16 +912,22 @@ def decideCut(folderName, mummerPath):
 
 
 def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
-    p = Pool(processes=houseKeeper.globalParallel)
-    results = []
-    
-    for eachmatchpair in resolvedList:
-        results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
+    if houseKeeper.globalRunMPI == False:
+        p = Pool(processes=houseKeeper.globalParallel)
+        results = []
+        
+        for eachmatchpair in resolvedList:
+            results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
 
-    
-    outputlist = [itemkk.get() for itemkk in results]
-    print  len(outputlist)
-    p.close()
+        outputlist = [itemkk.get() for itemkk in results]
+        print  len(outputlist)
+        p.close()
+    else:
+        outputlist = []
+        
+        for eachmatchpair in resolvedList:
+            ans = singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)
+            outputlist.append(ans)
 
     return outputlist
 
