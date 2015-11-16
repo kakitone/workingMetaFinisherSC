@@ -138,11 +138,18 @@ if me ==0 :
         print "Sorry. The above folders or files are missing or options are not correct. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
 
     print  "Time", time.time() - t0
+    
+    if houseKeeper.globalRunMPI == True:
+        for i in range(nproc):
+            data = "endall"
+            comm.send(data, dest=i)
+
 
 else:
     while True:
         data = comm.recv(source=0)
-        #print "receiver", me ,"iteration" ,i, data[-2]
+        if data == "endall":
+            break
         mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion= data
         alignerRobot.useMummerAlign(mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion)
 
