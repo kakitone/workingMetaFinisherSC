@@ -140,7 +140,7 @@ if me ==0 :
     print  "Time", time.time() - t0
     
     if houseKeeper.globalRunMPI == True:
-        for i in range(nproc):
+        for i in range(1, nproc):
             data = "endall"
             comm.send(data, dest=i)
 
