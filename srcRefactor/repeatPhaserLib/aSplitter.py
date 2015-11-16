@@ -1,4 +1,5 @@
 import abunSplitter
+import abunGraphLib
 
 from finisherSCCoreLib import houseKeeper
 from finisherSCCoreLib import alignerRobot
@@ -148,13 +149,18 @@ if me ==0 :
 else:
     while True:
         data = comm.recv(source=0)
+
         if data == "endall":
             break
-        mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion= data
-        alignerRobot.useMummerAlign(mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion)
 
-        comm.send(data, dest=0)
-
-    
+        elif len(data) > 0 and data[0] == "nucmerjob":
+            mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion= data[1:]
+            alignerRobot.useMummerAlign(mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName , refinedVersion)
+            comm.send(data, dest=0)
+        elif len(data) > 0 and data[0] == "gapjob":
+            eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename = data[1:]
+            newdata = abunGraphLib.singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)
+            comm.send(newdata, dest=0)
+            
 
     

@@ -923,17 +923,37 @@ def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph
         print  len(outputlist)
         p.close()
     else:
+        from mpi4py import MPI
+        from mpi4py.MPI import ANY_SOURCE
+
+        comm = MPI.COMM_WORLD
+        me = comm.Get_rank()
+        numberOfWorkers = comm.Get_size() - 1
+
+        results = []
         outputlist = []
-        
+
         for eachmatchpair in resolvedList:
-            ans = singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)
-            outputlist.append(ans)
+            results.append([eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename])
+
+        for i in range(len(results)):
+            data = results[i]
+            data.insert(0, "gapjob")
+            print "master sender", data[0] 
+            comm.send(data, dest=(i%numberOfWorkers) +1)
+            
+
+        for i in range(len(results)):    
+            data = comm.recv(source=ANY_SOURCE)
+            print "master receiver", data[0:3]
+            outputlist.append(data)
+
+
 
     return outputlist
 
 
 def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
-
     #print eachmatchpair
     leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
     

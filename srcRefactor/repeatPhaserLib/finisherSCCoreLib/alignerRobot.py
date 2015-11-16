@@ -139,6 +139,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
 
         for i in range(len(results)):
             data = results[i]
+            data.insert(0, "nucmerjob")
             print "master sender", data[-2] 
             comm.send(data, dest=(i%numberOfWorkers) +1)
         
