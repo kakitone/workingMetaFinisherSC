@@ -862,7 +862,6 @@ def formPathSeq(folderName, mummerPath, directPathList, indirectPathList, contig
     IORobot.writeSegOut(directPathSeqList,folderName,"directPath.fasta")
     IORobot.writeSegOut(indirectPathSeqList,folderName,"indirectPath.fasta")
 
-
 def decideCut(folderName, mummerPath):
     
     '''
@@ -909,8 +908,6 @@ def decideCut(folderName, mummerPath):
 
     return toDelete
 
-
-
 def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
     if houseKeeper.globalRunMPI == False:
         p = Pool(processes=houseKeeper.globalParallel)
@@ -951,7 +948,6 @@ def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph
 
 
     return outputlist
-
 
 def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
     #print eachmatchpair

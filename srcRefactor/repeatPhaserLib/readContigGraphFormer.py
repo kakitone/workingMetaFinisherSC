@@ -97,9 +97,12 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
     
     header, referenceFile, queryFile = optTypeFileHeader + "CC", contigFilename + "_Double.fasta" , contigFilename + "_Double.fasta"
+    
+    #if needAlignment:
+    #    alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
     if needAlignment:
-        alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
-
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[header, referenceFile, queryFile, ""]], houseKeeper.globalParallel )
+        
     lenDicCC = IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
     dataListCC = alignerRobot.extractMumData(folderName, header + "Out")
     dataListCC = abunHouseKeeper.filterData(dataListCC, lenDicCC)
