@@ -161,6 +161,11 @@ else:
             eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename = data[1:]
             newdata = abunGraphLib.singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)
             comm.send(newdata, dest=0)
+        elif len(data) > 0 and data[0] == "onlynucmer":
+            specialForRaw, mummerLink, folderName, outputName, referenceName, queryName,refinedVersion = data[1:]
+            alignerRobot.nucmerMummer(specialForRaw, mummerLink, folderName, outputName, referenceName, queryName,refinedVersion)
+            comm.send(data, dest=0)
+
             
 
     

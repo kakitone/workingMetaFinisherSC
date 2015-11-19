@@ -281,6 +281,7 @@ def evaluateCoverage(dataList, lenDic, readLenDic, folderName,mummerLink, contin
         myCountDic[eachitem] = 0
     
     dataList.sort(key = itemgetter(-1)) 
+
     
     ctkk, ctbase = 0, 0
     toAddBackDic = copy.deepcopy(readLenDic)
@@ -376,7 +377,9 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
         workerList.append([outputName, referenceName, queryName, specialName])
     
     if True:
-        alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,False)
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
+        #assert(False)
+
         '''
         command = mummerLink + "nucmer --maxmatch --nosimplify -p " + folderName + "out " + folderName + "improved3.fasta "+folderName+"raw_reads.part-" + indexOfMum + ".fasta"
         os.system(command)
@@ -392,9 +395,11 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
             indexOfMum = "0" + str(i)
         else:
             indexOfMum = str(i)
-        dataList = dataList+ alignerRobot.extractMumData(folderName, "outAbun"+ str(indexOfMum)+"Out")
-    
 
+        if  not houseKeeper.globalLarge:
+            dataList = dataList+ alignerRobot.extractMumData(folderName, "outAbun"+ str(indexOfMum)+"Out")
+        else:
+            dataList = dataList+ alignerRobot.extractMumData(folderName, "outAbun"+ str(indexOfMum))
     '''
     2. Calculate count on the abundances 
         a. Aggregate by taking average [put weights on bin along contigs]
@@ -1226,10 +1231,8 @@ def mainFlow(folderName, mummerLink):
         readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph, False)
         splitter(folderName, mummerLink, contigReadGraph, contigFilename,readsetFilename )
     
-        
-    os.system("cp selected_raw.part-* "+ folderName )
-    os.system("rm selected_raw.part-*")
-
+    os.system("mv *.fasta " + folderName )
+    
 
 
 

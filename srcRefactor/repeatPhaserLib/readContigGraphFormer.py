@@ -59,9 +59,6 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
     command = bindir + "/finisherSCCoreLib/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + queryFile
     os.system(command)
     
-    os.system("cp *.fasta " + folderName )
-    os.system("rm *.fasta ")
-    
     workerList = []
     
     for dummyI in range(1, numberOfFiles + 1):
@@ -74,9 +71,10 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
         outputName, referenceName, queryName, specialName= header+indexOfMum, referenceFile,queryFile[0:-6]+".part-"+ indexOfMum + ".fasta" ,  header + indexOfMum
         workerList.append([outputName, referenceName, queryName, specialName])
         
-    alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = False, refinedVersion = False)
+    alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = True, refinedVersion = False)
     alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
     
+    #assert(False)
 
 def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFilename, optTypeFileHeader, graphName, needAlignment=True):
     
@@ -100,7 +98,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
     #if needAlignment:
     #    alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
-    if needAlignment:
+    if  needAlignment:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[header, referenceFile, queryFile, ""]], houseKeeper.globalParallel )
         
     lenDicCC = IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
