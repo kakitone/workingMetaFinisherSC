@@ -103,7 +103,6 @@ def zeropadding(i):
     else:
         tmpi = str(i)
     return tmpi
-   
 
 def calculate(func, args):
     func(*args)
@@ -201,8 +200,6 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
 
             combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles, specialForRaw)
 
-
-
 def formLargeWorkerList(workerList, numberOfFiles, specialForRaw, refinedVersion, folderName,mummerLink, mpijob):
 
     results = []
@@ -222,7 +219,6 @@ def formLargeWorkerList(workerList, numberOfFiles, specialForRaw, refinedVersion
 
     return results
 
-
 def breakLargeFiles(workerList, folderName ,specialForRaw, numberOfFiles):
 
     for eachitem in workerList:
@@ -239,7 +235,6 @@ def breakLargeFiles(workerList, folderName ,specialForRaw, numberOfFiles):
 
         command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + queryNameMod
         os.system(command)
-
 
 def combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles, specialForRaw):
     for eachitem in workerList:

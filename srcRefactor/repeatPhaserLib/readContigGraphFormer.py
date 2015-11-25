@@ -72,7 +72,11 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
         workerList.append([outputName, referenceName, queryName, specialName])
         
     alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = True, refinedVersion = False)
-    alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
+
+    if  not houseKeeper.globalLarge:
+        alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
+    else:
+        alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header , numberOfFiles)
     
     #assert(False)
 

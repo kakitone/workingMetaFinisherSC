@@ -666,7 +666,8 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
                 adaptorPair.append([i, i-1])
     
     Gnew = abunGraphLib.seqGraphDynamic(N1)
-    
+        
+
     for i in range(N1):
         for j in adj[i]:
             Gnew.insertEdge(i,j,1997)
@@ -681,7 +682,10 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
             Gnew.removeEdge(u, yIndex)
 
 
-    Gnew.reportEdge()
+    #Gnew.reportEdge()
+    
+    Gnew.saveToFile(folderName, "basicGraphSurgery")    
+
     ### Trying out the new component 
     import toCondenseFixer
     Gnew = toCondenseFixer.noGoZoneDefiner(Gnew, folderName)
@@ -709,6 +713,8 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
         Gnew.condense()
         Gnew.findAdjList()
     
+    Gnew.saveToFile(folderName, "allGraphSurgery")
+
     return Gnew
 
 def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mummerLink):
