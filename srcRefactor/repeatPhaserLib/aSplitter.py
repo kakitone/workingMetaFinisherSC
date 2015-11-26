@@ -3,6 +3,8 @@ import abunGraphLib
 
 from finisherSCCoreLib import houseKeeper
 from finisherSCCoreLib import alignerRobot
+from finisherSCCoreLib import graphLib
+
 
 import time
 import argparse
@@ -165,7 +167,43 @@ else:
             specialForRaw, mummerLink, folderName, outputName, referenceName, queryName,refinedVersion = data[1:]
             alignerRobot.nucmerMummer(specialForRaw, mummerLink, folderName, outputName, referenceName, queryName,refinedVersion)
             comm.send(data, dest=0)
+        elif len(data) > 0 and data[0] == "parallelpath":
+            #data = "nothing"
+            ### need to fix what to process here... 
+            # Input here : startindex, endindex, N1, folderName, contigReadGraph
+            # Output here : adjList = [  [1, [2,3,4]] , [ 2, [3, 4, 5] ], ..., ]
+            startindex, endindex, N1, folderName, contigReadGraph= data[1] ,data[2], data[3] , data[4] , data[5]
+    
+            G = graphLib.seqGraph(0)
+            G.loadFromFile(folderName, contigReadGraph)
 
-            
+            adjList = []
+
+            for i in range(startindex, endindex):
+                tmpList = abunGraphLib.findAllReachable(i, N1, G)
+                adjList.append([i, tmpList])
+
+            comm.send(adjList, dest=0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     

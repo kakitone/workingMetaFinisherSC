@@ -644,12 +644,47 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
     
     adj = [[] for i in range(N1)]
     
-    for i in range(N1): 
-        tmpList = abunGraphLib.findAllReachable(i, N1, G)
-        
-        for j in tmpList:
-            if len(abunGraphLib.findAllPathK(i,j,G,kthres)) >= edgeThres:
-                adj[i].append(j) 
+    if houseKeeper.globalRunMPI == True and houseKeeper.globalLarge:
+        from mpi4py import MPI
+        from mpi4py.MPI import ANY_SOURCE
+
+        comm = MPI.COMM_WORLD
+        me = comm.Get_rank()
+        numberOfWorkers = comm.Get_size() - 1
+
+        resultList = []
+        for i in range(numberOfWorkers):
+            # will check this. 
+            startindex, endindex = i*N1/numberOfWorkers, (i+1)*N1/numberOfWorkers
+            if i == numberOfWorkers: 
+                endindex = N1 
+
+            resultList.append([startindex, endindex, N1, folderName, contigReadGraph])
+
+        for i in range(len(resultList)):
+            data = resultList[i]
+            data.insert(0, "parallelpath")
+            print "master sender", data[0] 
+            comm.send(data, dest=(i%numberOfWorkers) +1)
+
+
+        for i in range(len(resultList)):    
+            data = comm.recv(source=ANY_SOURCE)
+            for eachdata in data:
+                rowNum, columnList = eachdata[0], eachdata[1]
+                adj[rowNum] = columnList
+            print "master receiver", data[0]
+
+
+        #print adj
+        #assert(False)
+    else:
+        for i in range(N1): 
+            tmpList = abunGraphLib.findAllReachable(i, N1, G)
+            
+            for j in tmpList:
+                if len(abunGraphLib.findAllPathK(i,j,G,kthres)) >= edgeThres:
+                    adj[i].append(j) 
     
     ### Filter adaptor skipped case 
 
