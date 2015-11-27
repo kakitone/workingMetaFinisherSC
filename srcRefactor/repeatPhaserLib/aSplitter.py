@@ -183,6 +183,7 @@ else:
                 tmpList = abunGraphLib.findAllReachable(i, N1, G)
                 adjList.append([i, tmpList])
 
+            print "0: send", adjList
             comm.send(adjList, dest=0)
 
 
