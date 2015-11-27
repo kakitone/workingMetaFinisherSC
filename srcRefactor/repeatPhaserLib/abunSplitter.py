@@ -644,7 +644,7 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
     
     adj = [[] for i in range(N1)]
     
-    if houseKeeper.globalRunMPI == True and houseKeeper.globalLarge:
+    if houseKeeper.globalRunMPI == True :
         from mpi4py import MPI
         from mpi4py.MPI import ANY_SOURCE
 
