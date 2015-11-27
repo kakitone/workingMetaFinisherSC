@@ -650,7 +650,7 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
 
         comm = MPI.COMM_WORLD
         me = comm.Get_rank()
-        numberOfWorkers = max(comm.Get_size() - 1, N1)
+        numberOfWorkers = min(comm.Get_size() - 1, N1)
 
         resultList = []
         for i in range(numberOfWorkers):
