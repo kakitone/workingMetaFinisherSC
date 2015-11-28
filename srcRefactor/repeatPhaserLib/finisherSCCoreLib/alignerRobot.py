@@ -158,7 +158,6 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 print "master sender", data[-2] 
                 comm.send(data, dest=(i%numberOfWorkers) +1)
 
-
             for i in range(len(results)):    
                 data = comm.recv(source=ANY_SOURCE)
                 print "master receiver", data[-2]
@@ -235,6 +234,7 @@ def breakLargeFiles(workerList, folderName ,specialForRaw, numberOfFiles):
 
         command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + queryNameMod
         os.system(command)
+        #assert(False)
 
 def combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles, specialForRaw):
     for eachitem in workerList:
@@ -282,7 +282,8 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
         print "full_path", full_path
         command = full_path + "/fasta-splitter.pl --n-parts " + str(queryFileNum) + " " + folderName + qryFile +".fasta"
         os.system(command)
-        os.system("mv *.fasta "+ folderName)
+
+        #os.system("mv *.fasta "+ folderName)
         
     numberOfFiles = queryFileNum
     
@@ -299,7 +300,7 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
             outputName, referenceName, queryName, specialName= mumTmpHeader+indexOfMum, refFile+".fasta", qryFile+".part-"+ indexOfMum + ".fasta",  mumTmpHeader + indexOfMum
             workerList.append([outputName, referenceName, queryName, specialName])
 
-        useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,False)
+        useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
     
     dataList = []
     
@@ -308,14 +309,16 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
             indexOfMum = "0" + str(i)
         else:
             indexOfMum = str(i)
-        dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum)+"Out")
 
-
+        dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum))
     
+
     #print "len(dataList)", len(dataList)
     #print "dataList[0]", dataList[0]
     #assert(False)
-
-
+    
     return dataList 
+
+
+
 

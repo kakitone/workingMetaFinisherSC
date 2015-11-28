@@ -748,11 +748,14 @@ Only Long reads and long contigs case:
 
 def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
-    if not mergerGlobalFixerRobot.tuneParaOnly:
+    #if not mergerGlobalFixerRobot.tuneParaOnly:
+    
+    if True:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self"+inputName, inputName+".fasta", inputName+".fasta", ""]], houseKeeper.globalParallel )
-        
+
     dataList = alignerRobot.extractMumData(folderName, "self"+inputName+"Out")
     dataList = alignerRobot.transformCoor(dataList)
+    
     lenDic = IORobot.obtainLength(folderName, inputName+'.fasta')
     matchThres = 10000
     nonMatchThres = 500

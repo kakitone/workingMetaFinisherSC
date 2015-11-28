@@ -63,14 +63,9 @@ def familyList(x):
             
     return familyKmers
                     
-
-
-
-
 def removeEmbedded(folderName , mummerLink):
     print "removeEmbedded"
     removeRedundantWithFile(folderName , mummerLink, "contigs", "self", "noEmbed")
-
 
 def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpName, outputFileName):
     thres = 10
@@ -124,7 +119,6 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
 
     IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, returnList)
 
-
 def obtainComplement(lenDic, removeList):
     nameList = []
     for eachitem in lenDic:
@@ -166,8 +160,5 @@ def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFile
     IORobot.putListToFileO(folderName, fileQ, outputFileName, nonRedundantList)
         
     os.system("cp "+ folderName + "SC_n_tmp.fasta "+ folderName + "SC_n.fasta")
-    
-    
-
     
     

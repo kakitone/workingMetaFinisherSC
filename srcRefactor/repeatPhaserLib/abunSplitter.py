@@ -825,9 +825,6 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mumme
         with open(folderName + "abunAnalysisList.json", 'w') as f:
             json.dump(abunAnalysisList, f)    
 
-        #assert(1==2)
-
-
         return Gnew
 
     else:
@@ -1274,6 +1271,8 @@ def mainFlow(folderName, mummerLink):
     
     os.system("mv *.fasta " + folderName )
     
+
+
 
 
 
