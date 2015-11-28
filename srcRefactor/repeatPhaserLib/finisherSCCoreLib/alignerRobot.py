@@ -273,20 +273,18 @@ def transformCoor(dataList):
     
     return newList
 
-def largeRvsQAlign(folderName, numberOfFiles, mummerLink, refFile, qryFile, mumTmpHeader):
+def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTmpHeader):
     
     # Rmk: refFile, qurFile without .fasta
     if True:
         # bindir = os.path.abspath(os.path.dirname(sys.argv[0]))
         full_path = os.path.dirname(os.path.realpath(__file__))
         print "full_path", full_path
-        command = full_path + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + qryFile +".fasta"
+        command = full_path + "/fasta-splitter.pl --n-parts " + str(queryFileNum) + " " + folderName + qryFile +".fasta"
         os.system(command)
+        os.system("mv *.fasta "+ folderName)
         
-        os.system("cp *.fasta "+ folderName)
-        os.system("rm *.fasta")
-        
-    numberOfFiles = houseKeeper.globalParallelFileNum
+    numberOfFiles = queryFileNum
     
     if True: 
         workerList = []
@@ -311,6 +309,13 @@ def largeRvsQAlign(folderName, numberOfFiles, mummerLink, refFile, qryFile, mumT
         else:
             indexOfMum = str(i)
         dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum)+"Out")
+
+
     
+    #print "len(dataList)", len(dataList)
+    #print "dataList[0]", dataList[0]
+    #assert(False)
+
+
     return dataList 
 

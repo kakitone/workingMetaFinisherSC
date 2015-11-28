@@ -167,7 +167,7 @@ def alignSR2LC(folderName, mummerLink, incontigName):
     outputName, referenceName, queryName = "SR2"+incontigName+"Align" , incontigName, "SR" 
     
     if True:
-        dataList = alignerRobot.largeRvsQAlign(folderName, 20, mummerLink, referenceName, queryName, outputName)
+        dataList = alignerRobot.largeRvsQAlign(folderName, houseKeeper.globalParallelFileNum, mummerLink, referenceName, queryName, outputName)
 
     
     dataList.sort(key = itemgetter(-1))
