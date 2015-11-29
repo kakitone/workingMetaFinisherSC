@@ -980,6 +980,6 @@ def mainFlow(newFolderName, newMummerLink):
         
 
     nonRedundantResolver.removeRedundantWithFile(newFolderName , newMummerLink, "contigs", "mFixingFinalRedundantRemove", finalOutName)
-
+    os.system("mv *.fasta " + newFolderName)
 
 

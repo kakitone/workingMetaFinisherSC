@@ -75,7 +75,7 @@ def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, sp
     print ""
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10:
+        if dummyI < 10  and numberOfFiles>=10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
@@ -87,7 +87,7 @@ def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, sp
 
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10:
+        if dummyI < 10  and numberOfFiles>=10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
@@ -292,7 +292,7 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
         
         for dummyI in range(1, numberOfFiles + 1):
             indexOfMum = ""
-            if dummyI < 10:
+            if dummyI < 10  and numberOfFiles>=10:
                 indexOfMum = "0" + str(dummyI)
             else:
                 indexOfMum = str(dummyI)
@@ -316,7 +316,7 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
     #print "len(dataList)", len(dataList)
     #print "dataList[0]", dataList[0]
     #assert(False)
-    
+
     return dataList 
 
 

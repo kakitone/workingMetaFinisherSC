@@ -75,9 +75,7 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
 
     if True:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[mummerTmpName, inputFilename+".fasta", inputFilename+".fasta", ""]], houseKeeper.globalParallel )
-        # alignerRobot.useMummerAlign(mummerLink, folderName, "self", "contigs.fasta", "contigs.fasta")
-        # outputName, referenceName, queryName, specialName
-    
+
     dataList = alignerRobot.extractMumData(folderName, mummerTmpName+ "Out")
     
     dataList = alignerRobot.transformCoor(dataList)
@@ -151,8 +149,6 @@ def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFile
         
         if abs(l2 - match2) < thres:
             isRedundantList.append(name2)
-    
-    #print lenDicQ
 
     nonRedundantList = obtainComplement(lenDicQ, isRedundantList)
     

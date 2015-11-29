@@ -75,7 +75,7 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
                 
                 for dummyI in range(1, numberOfFiles + 1):
                     indexOfMum = ""
-                    if dummyI < 10:
+                    if dummyI < 10  and numberOfFiles>=10:
                         indexOfMum = "0" + str(dummyI)
                     else:
                         indexOfMum = str(dummyI)

@@ -331,7 +331,7 @@ def evaluateCoverage(dataList, lenDic, readLenDic, folderName,mummerLink, contin
         
         for dummyI in range(1, numberOfFiles + 1):
             indexOfMum = ""
-            if dummyI < 10:
+            if dummyI < 10 and numberOfFiles>=10 :
                 indexOfMum = "0" + str(dummyI)
             else:
                 indexOfMum = str(dummyI)
@@ -365,7 +365,7 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
     workerList = []
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10:
+        if dummyI < 10 and numberOfFiles>=10 :
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)

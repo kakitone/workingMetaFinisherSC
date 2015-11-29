@@ -16,14 +16,12 @@ def fixAdaptorSkip(folderName, mummerLink, inputFileName, outputFileName):
     delta = 5000 
     largeThres = 5000
     
+
     if True:
-        outputName, referenceName, queryName =  "adaptorCk", inputFileName, inputFileName
-        command = mummerLink + "nucmer  -p " + folderName + outputName + " " + folderName + referenceName + " " + folderName + queryName
-        os.system(command)
-    
-        alignerRobot.showCoorMummer(False, mummerLink, folderName, outputName, "")
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["adaptorCk", inputFileName, inputFileName, ""]], houseKeeper.globalParallel )
 
     dataList = alignerRobot.extractMumData(folderName, "adaptorCkOut")
+    
     lenDic = IORobot.obtainLength(folderName, inputFileName)
     
     dataL = len(dataList[0])
@@ -107,7 +105,6 @@ def fixAdaptorSkip(folderName, mummerLink, inputFileName, outputFileName):
     os.system("cp " + folderName + "contigs.fasta " + folderName + "contigsbackup.fasta")
     os.system("cp " + folderName + "clearedAdaptor_"+inputFileName + " " + \
               folderName + "contigs.fasta")
-    
     '''
 
     if True:

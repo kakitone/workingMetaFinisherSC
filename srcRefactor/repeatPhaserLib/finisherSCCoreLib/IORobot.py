@@ -410,10 +410,10 @@ def truncateEndOfContigs(folderName, filenameIn, filenameOut, maxSize, lengthDic
     fSmaller.close()
     fmyFile.close()
 
-def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K):
+def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K, numberOfFiles):
     dataSet = []
     indexOfMum = ""
-    if dummyI < 10:
+    if dummyI < 10 and numberOfFiles>=10:
         indexOfMum = "0" + str(dummyI)
     else:
         indexOfMum = str(dummyI)
@@ -439,8 +439,6 @@ def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K)
         rdGpArr = info[-1].split('\t')
         firstArr = info[0].split()
         matchLenArr = info[2].split()
-       
-    
         matchLen = int(matchLenArr[1])    
         contigStart, contigEnd = int(firstArr[0]), int(firstArr[1])
         readStart, readEnd = int(filterArr[0]) , int(filterArr[1])
