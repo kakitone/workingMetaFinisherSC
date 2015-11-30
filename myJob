@@ -1,0 +1,9 @@
+#PBS -q debug
+#PBS -l mppwidth=24
+#PBS -l walltime=00:29:00
+#PBS -N metajob
+#PBS -j oe
+
+cd ./
+aprun -n 1 -d 24 ./bashScript.sh
+
