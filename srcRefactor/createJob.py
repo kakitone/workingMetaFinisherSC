@@ -39,7 +39,7 @@ def createShellScript():
 		optionToRun = "-sc 20 "
 
 
-	pythonCommand = pythonheader + " " + toolName + " " +  isMPI + " " +  optionToRun + " " + args['workdir'] + " " + args['datadir'] 
+	pythonCommand = pythonheader + " " + toolName + " " +  isMPI + " " +  optionToRun + " " + args['datadir'] + " " + args['mumdir'] 
 
 	commandString = ("#!/bin/sh\n"
 				 	 "module load python\n"
@@ -91,6 +91,8 @@ parser.add_argument('-ma', '--machine', required=True)
 parser.add_argument('-to', '--tool', required=True)
 parser.add_argument('-wd', '--workdir', required=True)
 parser.add_argument('-dd', '--datadir', required=True)
+parser.add_argument('-md', '--mumdir', required=True)
+
 
 args = vars(parser.parse_args())
 if args['workdir'][-1] != '/':
@@ -99,5 +101,10 @@ if args['workdir'][-1] != '/':
 if args['datadir'][-1] != '/':
 	args['datadir'] = args['datadir'] + "/"
 
+if args['mumdir'][-1] != '/':
+	args['mumdir'] = args['mumdir'] + "/"
+
 createJobSpec()
 createShellScript()
+
+
