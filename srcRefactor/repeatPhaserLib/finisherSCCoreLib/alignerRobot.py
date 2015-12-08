@@ -295,18 +295,13 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
     dataList = []
     
     for i in range(1, 1+numberOfFiles): 
-        if i < 10:
+        if i < 10 and numberOfFiles>=10:
             indexOfMum = "0" + str(i)
         else:
             indexOfMum = str(i)
 
         dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum))
     
-
-    #print "len(dataList)", len(dataList)
-    #print "dataList[0]", dataList[0]
-    #assert(False)
-
     return dataList 
 
 

@@ -379,7 +379,7 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
     dataList = []
     
     for i in range(1, 1+numberOfFiles): 
-        if i < 10:
+        if i < 10  and numberOfFiles>=10 :
             indexOfMum = "0" + str(i)
         else:
             indexOfMum = str(i)
