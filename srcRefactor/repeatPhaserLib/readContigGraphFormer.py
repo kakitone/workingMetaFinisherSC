@@ -72,13 +72,8 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
         workerList.append([outputName, referenceName, queryName, specialName])
         
     alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = True, refinedVersion = False)
-
-    if  not houseKeeper.globalLarge:
-        alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header + "Out" ,header , numberOfFiles)
-    else:
-        alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header , numberOfFiles)
+    alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header , numberOfFiles)
     
-    #assert(False)
 
 def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFilename, optTypeFileHeader, graphName, needAlignment=True):
     

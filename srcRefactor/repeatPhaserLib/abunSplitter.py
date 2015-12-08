@@ -370,23 +370,11 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
         else:
             indexOfMum = str(dummyI)
         
-        '''
-        "outGapFillRefine"+indexOfMum , "smaller_improvedContig.fasta",  "relatedReads_Double.part-" + indexOfMum + ".fasta",  "fromMumRefine" + indexOfMum
-        '''
         outputName, referenceName, queryName, specialName= "outAbun"+indexOfMum, contigFilename+".fasta", "raw_reads.part-"+ indexOfMum + ".fasta",  "outAbun" + indexOfMum
         workerList.append([outputName, referenceName, queryName, specialName])
     
     if True:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
-        #assert(False)
-
-        '''
-        command = mummerLink + "nucmer --maxmatch --nosimplify -p " + folderName + "out " + folderName + "improved3.fasta "+folderName+"raw_reads.part-" + indexOfMum + ".fasta"
-        os.system(command)
-    
-        command = mummerLink + "show-coords -r " + folderName + "out.delta > " + folderName + "fromMumAbun" + indexOfMum
-        os.system(command)
-        '''
         
     dataList = []
     
@@ -396,10 +384,8 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
         else:
             indexOfMum = str(i)
 
-        if  not houseKeeper.globalLarge:
-            dataList = dataList+ alignerRobot.extractMumData(folderName, "outAbun"+ str(indexOfMum)+"Out")
-        else:
-            dataList = dataList+ alignerRobot.extractMumData(folderName, "outAbun"+ str(indexOfMum))
+        dataList = dataList+ alignerRobot.extractMumData(folderName, "outAbun"+ str(indexOfMum))
+    
     '''
     2. Calculate count on the abundances 
         a. Aggregate by taking average [put weights on bin along contigs]
@@ -1258,7 +1244,7 @@ def mainFlow(folderName, mummerLink):
         associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
 
     if abunHouseKeeper.abunGlobalRunPickUp in ["find", "map"]  :
-        readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph , False)
+        readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph , True)
         
     if abunHouseKeeper.abunGlobalRunPickUp in ["find", "map", "count"] :
         myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
