@@ -74,7 +74,7 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
     alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = True, refinedVersion = False)
 
     if  not houseKeeper.globalLarge:
-        alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
+        alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header + "Out" ,header , numberOfFiles)
     else:
         alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header , numberOfFiles)
     
@@ -130,7 +130,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
         alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header )
     
     lenDicCR = dict(lenDicCC.items() + lenDicRR.items())
-    dataListCR = alignerRobot.extractMumData(folderName, header + "Out")
+    dataListCR = alignerRobot.extractMumData(folderName, header )
     dataListCR = abunHouseKeeper.filterData(dataListCR, lenDicCR)
             
     numberOfNodes = len(lenDicCR) 
@@ -162,7 +162,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
 def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFolderBackup/",optTypeFileHeader="phaseString", contigFilename="improved3", G = [], N1 = 0):
 
-    dataList = alignerRobot.extractMumData(folderName, optTypeFileHeader + "CR" + "Out")
+    dataList = alignerRobot.extractMumData(folderName, optTypeFileHeader + "CR" )
     dataList.sort(key = itemgetter(-2))
     lenDic =  IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
 

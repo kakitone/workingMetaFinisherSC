@@ -42,8 +42,6 @@ def runASplitter(args):
     print "houseKeeper.globalLarge, houseKeeper.globalParallelFileNum , houseKeeper.globalRunMPI ", \
     houseKeeper.globalLarge, houseKeeper.globalParallelFileNum , houseKeeper.globalRunMPI 
     
-    #assert(False)
-
     if args['avoidrefine'] == "False":
         abunHouseKeeper.abunGlobalAvoidrefine = False
     else:
@@ -53,6 +51,18 @@ def runASplitter(args):
         abunHouseKeeper.abunGlobalReadSearchDepth = int(args['readsearch']) 
     else:
         abunHouseKeeper.abunGlobalReadSearchDepth = 0
+
+
+    if args['basicgraph'] == "False":
+        abunHouseKeeper.abunGlobalBasicGraph = False
+    else:
+        abunHouseKeeper.abunGlobalBasicGraph = True
+
+    if args['abunreplow'] != None:
+        abunHouseKeeper.abunGlobalRepLower = int(args['abunreplow'])
+    else:
+        abunHouseKeeper.abunGlobalRepLower = 0
+
 
     if args['replace'] != None : 
         if  args['replace'] == 'skip':
@@ -67,7 +77,7 @@ def runASplitter(args):
     else:
         abunHouseKeeper.abunGlobalRRDisable = True
 
-    if args['pickup'] in [ "map", "count", "split", "graph"] :
+    if args['pickup'] in ["find", "map", "count", "split", "graph", "collapse"] :
         abunHouseKeeper.abunGlobalRunPickUp = args['pickup']
 
     if args['runemalgo'] == "True":
@@ -165,8 +175,6 @@ def runMFixer(args):
 
     print  "Time", time.time() - t0
 
-
-
 def runMPIWorker(comm):
     while True:
         data = comm.recv(source=0)
@@ -204,7 +212,6 @@ def runMPIWorker(comm):
 
             print "0: send", adjList, startindex, endindex
             comm.send(adjList, dest=0)
-
 
 def runJob(args, jobname):
     if args['runmpi'] == "True":

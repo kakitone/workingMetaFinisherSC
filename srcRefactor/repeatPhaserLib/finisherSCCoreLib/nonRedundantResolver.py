@@ -101,7 +101,7 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
             elif abs(l1 - match1) > thres and abs(l2 - match2) < thres:
                 removeList.append(name2)
             elif abs(l1 - match1) < thres and abs(l2 - match2) < thres:
-                print "Both shortembedd", eachitem
+                #print "Both shortembedd", eachitem
                 union(shortEmbedClusterDic[name1], shortEmbedClusterDic[name2])
 
         
@@ -118,16 +118,22 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
     IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, returnList)
 
 def obtainComplement(lenDic, removeList):
-    nameList = []
+    nameDic = {}
     for eachitem in lenDic:
-        nameList.append(eachitem)
+        nameDic[eachitem] = 1
 
-    print len(nameList)
+    print "len(nameDic)", len(nameDic)
     
     for eachitem in removeList:
-        if eachitem in nameList:
-            nameList.remove(eachitem)
-    print len(nameList)
+        if nameDic[eachitem] == 1:
+            nameDic[eachitem] = 0 
+    nameList = []
+
+    for eachitem in nameDic:
+        if nameDic[eachitem] == 1:
+            nameList.append(eachitem)
+
+    print "len(nameList)", len(nameList)
     return nameList
 
 def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFileName):

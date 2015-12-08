@@ -94,7 +94,7 @@ def formSortedDataList(folderName):
 	sortedContigList,  sortedReadList, sortedContigDic, sortedReadDic =\
 		[], [] , {}, {}
 
-	dataList = alignerRobot.extractMumData(folderName, "phaseStringCROut")
+	dataList = alignerRobot.extractMumData(folderName, "phaseStringCR")
 
 	sortedContigList = sorted(dataList, key = itemgetter(-2))
 

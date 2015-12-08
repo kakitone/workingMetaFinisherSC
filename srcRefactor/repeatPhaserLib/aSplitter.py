@@ -14,6 +14,9 @@ parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estim
 parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)
 parser.add_argument('-rd', '--RRDisable', help= 'Whether one should disable Read to Read overlap check (input is True)', required=False)
 parser.add_argument('-pk', '--pickup', help= 'where to run ASplitter, map/count/split/graph', required=False)
+parser.add_argument('-bg', '--basicgraph', help= 'whether to run basicGraph only in graphSurgery', required=False)
+parser.add_argument('-al', '--abunreplow', help= 'lower bound on repeat inlist/outlist', required=False)
+
 
 parser.add_argument('-em', '--runemalgo', help= 'whether to run EM for splitting repeats', required=False)
 parser.add_argument('-mpi', '--runmpi', help= 'whether to run MPI', required=False)
@@ -28,15 +31,3 @@ mpiHelper.runJob(args, "asplitter")
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-    

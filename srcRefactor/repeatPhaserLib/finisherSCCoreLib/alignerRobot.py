@@ -72,17 +72,8 @@ def showCoorMummer(specialForRaw, mummerLink, folderName, outputName, specialNam
     os.system(command)
 
 def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, specialName, numberOfFiles):
-    print ""
-    for dummyI in range(1, numberOfFiles + 1):
-        indexOfMum = ""
-        if dummyI < 10  and numberOfFiles>=10:
-            indexOfMum = "0" + str(dummyI)
-        else:
-            indexOfMum = str(dummyI)
-        showCoorMummer(specialForRaw, mummerLink, folderName, outputName+indexOfMum, specialName+indexOfMum)
-    
-    
-    command =  "head -5 "+ folderName + specialName +"01" + "> " + folderName +specialName
+    print ""    
+    command =  "head -5 "+ folderName + outputName +"01" + "> " + folderName +specialName
     os.system(command)
 
     for dummyI in range(1, numberOfFiles + 1):
@@ -92,12 +83,11 @@ def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, sp
         else:
             indexOfMum = str(dummyI)
     
-        command = " tail -n+6 "+ folderName + specialName +indexOfMum +">> " + folderName +specialName
+        command = " tail -n+6 "+ folderName + outputName +indexOfMum +">> " + folderName +specialName
         os.system(command)
 
 def zeropadding(i):
     tmpi = ""
-
     if i < 10:
         tmpi = "0" + str(i)
     else:
@@ -247,14 +237,14 @@ def combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles, sp
 
         tmpName = folderName + outputName + zeropadding(1) + zeropadding(1) + ".delta"
 
-        command = mummerLink + "show-coords -r " + tmpName + "| head -5 > " + outNameMod
+        command = mummerLink + "show-coords -r " + tmpName + " | head -5 > " + outNameMod
         os.system(command)
         
         for i in range(1, numberOfFiles+1):
             for j in range(1, numberOfFiles+1):
                 
                 tmpName = folderName + outputName +zeropadding(i)+zeropadding(j) + ".delta"
-                command = mummerLink + "show-coords -r " + tmpName + "| tail -n+6 >> " + outNameMod
+                command = mummerLink + "show-coords -r " + tmpName + " | tail -n+6 >> " + outNameMod
                 os.system(command)
 
 def transformCoor(dataList):
