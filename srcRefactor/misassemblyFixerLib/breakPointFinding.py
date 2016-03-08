@@ -195,7 +195,13 @@ def fillInHidden(involvedBkPtsList):
 
 	return newItems
 
-def toAddPtsFormat(toAddPts, L):
+def toAddPtsFormat(oldToAddPts, L):
+	oldToAddPts.sort(key = itemgetter(0,3))
+	
+	toAddPts = []
+	for key, items in groupby(oldToAddPts, itemgetter(0,3)):
+		toAddPts.append(list(items)[0])
+	
 	newToAddPts = []
 	for i in range(len(toAddPts)):
 		tmpItem = toAddPts[i]
