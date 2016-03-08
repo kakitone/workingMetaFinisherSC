@@ -204,11 +204,7 @@ def filterDuplicate(bkptList):
 
 	for key, items in groupby(bkptList, itemgetter(-2,-1)):
 		newbkptList.append(list(items)[0])
-	'''
-	print "ddddddd" 
-	for eachitem in newbkptList:
-		print eachitem
-	'''
+
 	return newbkptList
 
 def toAddPtsFormat(toAddPts, L):
@@ -246,19 +242,21 @@ def addHiddenBkPts(bkpts):
 			newItems = fillInHidden(involvedBkPts)
 			toAddPts += newItems
 		
-		# toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
 		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
-		newBkpts =  toAddPts + bkpts
+		bkpts = toAddPts + bkpts
 
-		filteredBkpts = filterDuplicate(newBkpts)
+		#toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
+		#newBkpts =  toAddPts + bkpts
+
+		#filteredBkpts = filterDuplicate(newBkpts)
 
 		# print "len(toAddPts)", len(toAddPts)
-		print len(filteredBkpts) , len(bkpts)
+		#print len(filteredBkpts) , len(bkpts)
 
-	 	if len(filteredBkpts) > len(bkpts):
-			bkpts = filteredBkpts
-		else: 
-			break
+	 	#if len(filteredBkpts) > len(bkpts):
+		#	bkpts = filteredBkpts
+		#else: 
+		#	break
 
 	return bkpts
 
