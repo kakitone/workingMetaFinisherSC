@@ -52,14 +52,12 @@ def repeatFinder(folderName, inputName):
 	if False:
 		### Old method 
 		repeatIntervalDic = {}
-
 		count =0 
 		for key, items in groupby(newDataList, itemgetter(-2)):
 			
 			listOfIntervals = []
 			for eachsub in items:
 				listOfIntervals.append([eachsub[0], eachsub[1]])
-
 
 			if True:
 				thres = 30

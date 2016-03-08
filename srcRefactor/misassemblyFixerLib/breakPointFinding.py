@@ -80,6 +80,7 @@ def locateEnclosedBkPts(repeatIndex, mylist, bkpts, repeatDic):
 			j1_e = j1 + j
 		j += 1 
 	
+	
 	j =0 
 	while j < 100:
 		if j2 -j >= 0 and  bkpts[j2 - j][1] == repeatIndex and bkpts[j2 - j][2] == 3:
@@ -202,7 +203,7 @@ def addHiddenBkPts(bkpts):
 	bkPtRepeatSort = [eachitem for eachitem in bkpts]
 	bkPtRepeatSort.sort(key = itemgetter(1))
 
-	for i in range(1):
+	for i in range(2):
 		toAddPts = []
 
 		bkpts.sort(key = itemgetter(-2, -1))
@@ -426,13 +427,29 @@ def pipelineOriginalMethod(returnFormattedBkPtList):
 def returnBkPtBoolSat(mummerDataList):
 
 	bkpts = formNaturalBkPts(mummerDataList)
+	print "len(bkpts)", len(bkpts)
+
 	newbkts = addHiddenBkPts(bkpts)
+	print "len(newbkts)", len(newbkts)
+
 	newClusteredBks = clusterBkPts(newbkts)
+	print "len(newClusteredBks)", len(newClusteredBks)
+
 	linearSeqs, bkPt2ClustersMapDic = findSeqs(newClusteredBks)
+	print "len(linearSeqs)", len(linearSeqs)
+	print "len(bkPt2ClustersMapDic)", len(bkPt2ClustersMapDic)
+
 	setOfChoices = findInOutList(linearSeqs, bkPt2ClustersMapDic)
+	print "len(setOfChoices)", len(setOfChoices)
+
 	combineCutList = boolSat.findMinSat(setOfChoices)
+	print "len(combineCutList)", len(combineCutList)
+
 	returnFormattedBkPtList = returnBkPts(combineCutList, newClusteredBks)
+	print "len(returnFormattedBkPtList)", len(returnFormattedBkPtList)
+
 	repeatIntervalDic = pipelineOriginalMethod(returnFormattedBkPtList)
+	print "len(repeatIntervalDic)", len(repeatIntervalDic)
 
 	return repeatIntervalDic
 
