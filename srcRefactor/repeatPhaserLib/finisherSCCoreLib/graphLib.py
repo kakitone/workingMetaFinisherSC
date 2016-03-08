@@ -10,6 +10,7 @@ class seqGraphNode(object):
         self.listOfNextNodes = []
         self.visited = 0
 
+
 class seqGraph(object):
     def __init__(self, numberOfNodes):
         self.graphNodesList = [seqGraphNode(i) for i in range(numberOfNodes)]
@@ -356,6 +357,8 @@ class seqGraph(object):
     
                 
             self.condense()
+        
+
 
 def nameInEdgeList(name, myList):
     
@@ -364,6 +367,7 @@ def nameInEdgeList(name, myList):
         if eachitem[0] == name:
             haveInserted = True
     return haveInserted
+                
 
 def removeItem(myList, myname):
     newList = []

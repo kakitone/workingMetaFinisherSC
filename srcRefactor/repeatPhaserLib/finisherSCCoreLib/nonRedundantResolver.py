@@ -63,9 +63,14 @@ def familyList(x):
             
     return familyKmers
                     
+
+
+
+
 def removeEmbedded(folderName , mummerLink):
     print "removeEmbedded"
     removeRedundantWithFile(folderName , mummerLink, "contigs", "self", "noEmbed")
+
 
 def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpName, outputFileName):
     thres = 10
@@ -75,7 +80,9 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
 
     if True:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[mummerTmpName, inputFilename+".fasta", inputFilename+".fasta", ""]], houseKeeper.globalParallel )
-
+        # alignerRobot.useMummerAlign(mummerLink, folderName, "self", "contigs.fasta", "contigs.fasta")
+        # outputName, referenceName, queryName, specialName
+    
     dataList = alignerRobot.extractMumData(folderName, mummerTmpName+ "Out")
     
     dataList = alignerRobot.transformCoor(dataList)
@@ -101,7 +108,7 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
             elif abs(l1 - match1) > thres and abs(l2 - match2) < thres:
                 removeList.append(name2)
             elif abs(l1 - match1) < thres and abs(l2 - match2) < thres:
-                #print "Both shortembedd", eachitem
+                print "Both shortembedd", eachitem
                 union(shortEmbedClusterDic[name1], shortEmbedClusterDic[name2])
 
         
@@ -117,23 +124,18 @@ def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpNam
 
     IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, returnList)
 
-def obtainComplement(lenDic, removeList):
-    nameDic = {}
-    for eachitem in lenDic:
-        nameDic[eachitem] = 1
 
-    print "len(nameDic)", len(nameDic)
+def obtainComplement(lenDic, removeList):
+    nameList = []
+    for eachitem in lenDic:
+        nameList.append(eachitem)
+
+    print len(nameList)
     
     for eachitem in removeList:
-        if nameDic[eachitem] == 1:
-            nameDic[eachitem] = 0 
-    nameList = []
-
-    for eachitem in nameDic:
-        if nameDic[eachitem] == 1:
-            nameList.append(eachitem)
-
-    print "len(nameList)", len(nameList)
+        if eachitem in nameList:
+            nameList.remove(eachitem)
+    print len(nameList)
     return nameList
 
 def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFileName):
@@ -155,6 +157,8 @@ def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFile
         
         if abs(l2 - match2) < thres:
             isRedundantList.append(name2)
+    
+    #print lenDicQ
 
     nonRedundantList = obtainComplement(lenDicQ, isRedundantList)
     
@@ -162,5 +166,8 @@ def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFile
     IORobot.putListToFileO(folderName, fileQ, outputFileName, nonRedundantList)
         
     os.system("cp "+ folderName + "SC_n_tmp.fasta "+ folderName + "SC_n.fasta")
+    
+    
+
     
     

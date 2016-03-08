@@ -5,10 +5,9 @@ from finisherSCCoreLib import IORobot
 abunGlobalAvoidrefine = True
 abunGlobalReadSearchDepth = 0
 abunGlobalRRDisable = True
-abunGlobalRunPickUp = "find"
+abunGlobalRunPickUp = "map"
 abunGlobalRunEM = False
-abunGlobalBasicGraph = True
-abunGlobalRepLower = 0
+
 
 class abunSplitParameterRobot():
     def __init__(self):
@@ -78,7 +77,9 @@ class abunSplitParameterRobot():
                 canLoad = False
         return canLoad
 
+
 abunGlobalSplitParameterRobot = abunSplitParameterRobot()
+
 
 def replaceFiles( folderName, replacedName) :
     commandList = []

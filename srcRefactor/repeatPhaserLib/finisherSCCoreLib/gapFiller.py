@@ -119,14 +119,14 @@ def formRelatedReadsFile(folderName, mummerLink, inputFileName):
         bindir = os.path.abspath(os.path.dirname(sys.argv[0]))
         command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + "raw_reads.fasta"
         os.system(command)
-        #os.system("cp raw_reads.part* "+ folderName)
+        os.system("cp raw_reads.part* "+ folderName)
     
     
     workerList = []
     
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10  and numberOfFiles>=10:
+        if dummyI < 10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
@@ -150,7 +150,7 @@ def formRelatedReadsFile(folderName, mummerLink, inputFileName):
 
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10  and numberOfFiles>=10:
+        if dummyI < 10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
@@ -272,7 +272,7 @@ def extractEdgeSet(folderName, mummerLink, option="nopolish"):
     workerList = [] 
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10  and numberOfFiles>=10:
+        if dummyI < 10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
@@ -289,7 +289,7 @@ def extractEdgeSet(folderName, mummerLink, option="nopolish"):
         
     
     for dummyI in range(1, numberOfFiles + 1):
-        tmpSet = IORobot.obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K, numberOfFiles)
+        tmpSet = IORobot.obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K)
         dataSet = dataSet + tmpSet
     
     # ## repeat aware

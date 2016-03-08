@@ -218,6 +218,7 @@ class seqGraphDynamic(graphLib.seqGraph):
 
     def condenseEdgeRemove(self, G_ContigRead, folderName, mummerLink, contigFilename):
         print "condenseEdgeRemove"
+        thresPass = 100
         thresForStrangeCut = 5000
         ### kkdebug
 
@@ -240,7 +241,25 @@ class seqGraphDynamic(graphLib.seqGraph):
                         noGoNext = self.readInJSON(folderName, "noGoNext.json")
                         noGoPrev = self.readInJSON(folderName, "noGoPrev.json")
 
-                        if (cName in noGoNext or nName in noGoPrev ):
+                        overlap = [-1, -1]
+                        ctr = 0 
+
+                        for eachpath in contigReadPaths:
+                            if len(eachpath) > 2: 
+                                ctr = ctr + 1 
+                                
+                            elif len(eachpath) == 2:     
+                                
+                                contigName = cName
+                                leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+
+                                contigName = nName
+                                rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+                                
+                                overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+
+
+                        if ctr <= thresPass and  (cName in noGoNext or nName in noGoPrev or overlap[0] > thresForStrangeCut ):
                     
                             self.removeEdge(currentName, nextName)
                             toRemoveList.append([currentName, nextName])
@@ -259,25 +278,55 @@ class seqGraphDynamic(graphLib.seqGraph):
         return dataItem
     
     def transitiveReduction(self,folderName, mummerPath, contigFile, readFile, G_ContigRead):
-        print "transitiveReduction"
         for i in range(self.N1):
             for j in self.adj[i]:
-                self.removeEdge(i, j)                
+                self.removeEdge(i, j)
+                
                 canReach = self.reachable(i,j)
+                
                 if canReach == False:
                     self.insertEdge(i, j, 1997)
 
+                if False:
+                    contigPaths = findAllPathK(i,j, self,3)
+                    contigReadPaths = findAllPathK(i, j ,G_ContigRead ,5)
+
+                    directPathList = []
+                    for eachp in contigReadPaths:
+                        ck = False
+                        for pitem in eachp[1:-1] :
+                            if pitem < self.N1:
+                                ck = True
+                        if ck == False:
+                            directPathList.append(eachp)
+
+                    indirectPathList = []
+                    for eachp in contigPaths:
+                        if len(eachp) > 2:
+                            tmpPath = [eachp[0]]
+                            for pp in range(len(eachp) - 1):
+                                startI, endI = eachp[pp], eachp[pp+1]
+                                pathList = findAllPathK(startI, endI , G_ContigRead,3)
+                                tmpPath = tmpPath + pathList[0][1:]
+                            
+                            indirectPathList.append(tmpPath)
+
+                    formPathSeq(folderName, mummerPath, directPathList, indirectPathList, contigFile, readFile)
+
+                    toDelete = decideCut(folderName, mummerPath)
+                    if not toDelete : 
+                        self.insertEdge(i,j, 1997)
         self.findAdjList()
 
 
 
     def doubleEdgeReduction(self):
-        print "doubleEdgeReduction"
         for u in range(self.N1):
             for v in self.adj[u]:
                 if u in self.adj[v]:
                     self.removeEdge(u,v)
                     self.removeEdge(v,u)
+
 
         self.findAdjList()
 

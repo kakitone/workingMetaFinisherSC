@@ -75,7 +75,7 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
                 
                 for dummyI in range(1, numberOfFiles + 1):
                     indexOfMum = ""
-                    if dummyI < 10  and numberOfFiles>=10:
+                    if dummyI < 10:
                         indexOfMum = "0" + str(dummyI)
                     else:
                         indexOfMum = str(dummyI)
@@ -110,6 +110,7 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
             for key, items in groupby(filterList, itemgetter(-1)):
                 newReads.append(key)
                                         
+            
             f = open(folderName + forFastaName + ".txt", 'w')
             
             for eachitem in newReads:

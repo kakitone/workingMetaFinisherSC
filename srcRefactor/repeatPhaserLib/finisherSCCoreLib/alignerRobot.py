@@ -72,27 +72,38 @@ def showCoorMummer(specialForRaw, mummerLink, folderName, outputName, specialNam
     os.system(command)
 
 def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, specialName, numberOfFiles):
-    print ""    
-    command =  "head -5 "+ folderName + outputName +"01" + "> " + folderName +specialName
+    print ""
+    for dummyI in range(1, numberOfFiles + 1):
+        indexOfMum = ""
+        if dummyI < 10:
+            indexOfMum = "0" + str(dummyI)
+        else:
+            indexOfMum = str(dummyI)
+        showCoorMummer(specialForRaw, mummerLink, folderName, outputName+indexOfMum, specialName+indexOfMum)
+    
+    
+    command =  "head -5 "+ folderName + specialName +"01" + "> " + folderName +specialName
     os.system(command)
 
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10  and numberOfFiles>=10:
+        if dummyI < 10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
     
-        command = " tail -n+6 "+ folderName + outputName +indexOfMum +">> " + folderName +specialName
+        command = " tail -n+6 "+ folderName + specialName +indexOfMum +">> " + folderName +specialName
         os.system(command)
 
 def zeropadding(i):
     tmpi = ""
+
     if i < 10:
         tmpi = "0" + str(i)
     else:
         tmpi = str(i)
     return tmpi
+   
 
 def calculate(func, args):
     func(*args)
@@ -104,13 +115,14 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
     # Format for workerList : [[outputName, referenceName, queryName, specialName]... ]
     # nProc : a parameter on how many threads should be created each time
     # Goal : parallelize this part  
+
+    '''
+    Parallelization here ... 
+    '''
+
     print "houseKeeper.globalRunMPI", houseKeeper.globalRunMPI
 
-    mpijob = houseKeeper.globalRunMPI 
-
     if houseKeeper.globalRunMPI == True:
-
-        
         from mpi4py import MPI
         from mpi4py.MPI import ANY_SOURCE
 
@@ -118,41 +130,24 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
         me = comm.Get_rank()
         numberOfWorkers = comm.Get_size() - 1
 
-        #assert(me == 0)
+        assert(me == 0)
 
-        if not houseKeeper.globalLarge:
-            results = []
-            for eachitem in workerList:
-                outputName, referenceName, queryName, specialName = eachitem
-                results.append([mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName, refinedVersion])
+        results = []
+        for eachitem in workerList:
+            outputName, referenceName, queryName, specialName = eachitem
+            results.append([mummerLink, folderName, outputName, referenceName, queryName, specialForRaw , specialName, refinedVersion])
 
-            for i in range(len(results)):
-                data = results[i]
-                data.insert(0, "nucmerjob")
-                print "master sender", data[-2] 
-                comm.send(data, dest=(i%numberOfWorkers) +1)
-            
+        for i in range(len(results)):
+            data = results[i]
+            data.insert(0, "nucmerjob")
+            print "master sender", data[-2] 
+            comm.send(data, dest=(i%numberOfWorkers) +1)
+        
 
-            for i in range(len(results)):    
-                data = comm.recv(source=ANY_SOURCE)
-                print "master receiver", data[-2]
-        else:
+        for i in range(len(results)):    
+            data = comm.recv(source=ANY_SOURCE)
+            print "master receiver", data[-2]
 
-            numberOfFiles = 10
-            breakLargeFiles(workerList, folderName ,specialForRaw, numberOfFiles)
-            results = formLargeWorkerList(workerList, numberOfFiles, specialForRaw, refinedVersion, folderName,mummerLink, mpijob)
-
-            for i in range(len(results)):
-                data = results[i]
-                data.insert(0, "onlynucmer")
-                print "master sender", data[-2] 
-                comm.send(data, dest=(i%numberOfWorkers) +1)
-
-            for i in range(len(results)):    
-                data = comm.recv(source=ANY_SOURCE)
-                print "master receiver", data[-2]
-
-            combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles,specialForRaw)
 
     elif houseKeeper.globalRunMPI == False:
 
@@ -178,74 +173,71 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             raw_reads.part-01
             '''
             p = Pool(nProc)
+            results = []
             numberOfFiles = 10
+            
+            for eachitem in workerList:
+                print eachitem
+                outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
+            
+                
+                bindir =  os.path.abspath(os.path.dirname(sys.argv[0]))   
+                command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + referenceName
+                os.system(command)
+                
 
-            breakLargeFiles(workerList, folderName ,specialForRaw, numberOfFiles)
-            results = formLargeWorkerList(workerList, numberOfFiles, specialForRaw, refinedVersion, folderName,mummerLink, mpijob)
+                if specialForRaw : 
+                    queryNameMod = queryName
+                else:
+                    queryNameMod = folderName + queryName
+
+                command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + queryNameMod
+                os.system(command)
+            
+                
+            for eachitem in workerList:   
+                outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
+                for i in range(1, numberOfFiles+1):
+                    for j in range(1, numberOfFiles+1):
+                        if specialForRaw : 
+                            tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + "-" + zeropadding(j) + ".fasta"
+                        else:
+                            tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + ".part-" + zeropadding(j) + ".fasta"
+                        
+                        #results.append(p.apply_async(nucmerMummer, args =(specialForRaw, mummerLink, "", folderName + outputName +zeropadding(i)+zeropadding(j), tmpRefName, tmpQryName, refinedVersion)))
+                        results.append((nucmerMummer, (specialForRaw, mummerLink, "", folderName + outputName +zeropadding(i)+zeropadding(j), tmpRefName, tmpQryName, refinedVersion)))
 
             p.map_async(calculatestar, results,chunksize=max(1,len(results)/nProc))
             p.close()
             p.join()
 
-            combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles, specialForRaw)
-
-def formLargeWorkerList(workerList, numberOfFiles, specialForRaw, refinedVersion, folderName,mummerLink, mpijob):
-
-    results = []
-    for eachitem in workerList:   
-        outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
-        for i in range(1, numberOfFiles+1):
-            for j in range(1, numberOfFiles+1):
-                if specialForRaw : 
-                    tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + "-" + zeropadding(j) + ".fasta"
+            #outputlist = [itemkk.get() for itemkk in results]
+            #print len(outputlist)
+            #p.close()
+            
+            for eachitem in workerList:
+                outputName, referenceName, queryName, specialName = eachitem           
+                if not specialForRaw:
+                    outNameMod =  folderName + outputName + "Out"
                 else:
-                    tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + ".part-" + zeropadding(j) + ".fasta"
-                
-                if  mpijob:
-                    results.append([specialForRaw, mummerLink, "", folderName + outputName +zeropadding(i)+zeropadding(j), tmpRefName, tmpQryName, refinedVersion])
-                else:
-                    results.append((nucmerMummer, (specialForRaw, mummerLink, "", folderName + outputName +zeropadding(i)+zeropadding(j), tmpRefName, tmpQryName, refinedVersion)))
-
-    return results
-
-def breakLargeFiles(workerList, folderName ,specialForRaw, numberOfFiles):
-
-    for eachitem in workerList:
-        outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
-
-        bindir =  os.path.abspath(os.path.dirname(sys.argv[0]))   
-        command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + referenceName
-        os.system(command)
-        
-        if specialForRaw : 
-            queryNameMod = queryName
-        else:
-            queryNameMod = folderName + queryName
-
-        command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + queryNameMod
-        os.system(command)
-        #assert(False)
-
-def combineDataForLargeRun(workerList, folderName, mummerLink, numberOfFiles, specialForRaw):
-    for eachitem in workerList:
-        outputName, referenceName, queryName, specialName = eachitem           
-        if not specialForRaw:
-            outNameMod =  folderName + outputName + "Out"
-        else:
-            outNameMod = folderName + specialName 
-
-
-        tmpName = folderName + outputName + zeropadding(1) + zeropadding(1) + ".delta"
-
-        command = mummerLink + "show-coords -r " + tmpName + " | head -5 > " + outNameMod
-        os.system(command)
-        
-        for i in range(1, numberOfFiles+1):
-            for j in range(1, numberOfFiles+1):
-                
-                tmpName = folderName + outputName +zeropadding(i)+zeropadding(j) + ".delta"
-                command = mummerLink + "show-coords -r " + tmpName + " | tail -n+6 >> " + outNameMod
+                    outNameMod = folderName + specialName 
+            
+            
+                tmpName = folderName + outputName +zeropadding(1)+zeropadding(1) + ".delta"
+            
+                command = mummerLink + "show-coords -r " + tmpName + "| head -5 > " + outNameMod
                 os.system(command)
+                
+                for i in range(1, numberOfFiles+1):
+                    for j in range(1, numberOfFiles+1):
+                        
+                        tmpName = folderName + outputName +zeropadding(i)+zeropadding(j) + ".delta"
+                        command = mummerLink + "show-coords -r " + tmpName + "| tail -n+6 >> " + outNameMod
+                        os.system(command)
+            
+
+
+
 
 def transformCoor(dataList):
     # "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
@@ -263,26 +255,27 @@ def transformCoor(dataList):
     
     return newList
 
-def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTmpHeader):
+def largeRvsQAlign(folderName, numberOfFiles, mummerLink, refFile, qryFile, mumTmpHeader):
     
     # Rmk: refFile, qurFile without .fasta
     if True:
         # bindir = os.path.abspath(os.path.dirname(sys.argv[0]))
         full_path = os.path.dirname(os.path.realpath(__file__))
         print "full_path", full_path
-        command = full_path + "/fasta-splitter.pl --n-parts " + str(queryFileNum) + " " + folderName + qryFile +".fasta"
+        command = full_path + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + qryFile +".fasta"
         os.system(command)
-
-        #os.system("mv *.fasta "+ folderName)
         
-    numberOfFiles = queryFileNum
+        os.system("cp *.fasta "+ folderName)
+        os.system("rm *.fasta")
+        
+    numberOfFiles = houseKeeper.globalParallelFileNum
     
     if True: 
         workerList = []
         
         for dummyI in range(1, numberOfFiles + 1):
             indexOfMum = ""
-            if dummyI < 10  and numberOfFiles>=10:
+            if dummyI < 10:
                 indexOfMum = "0" + str(dummyI)
             else:
                 indexOfMum = str(dummyI)
@@ -290,20 +283,16 @@ def largeRvsQAlign(folderName, queryFileNum, mummerLink, refFile, qryFile, mumTm
             outputName, referenceName, queryName, specialName= mumTmpHeader+indexOfMum, refFile+".fasta", qryFile+".part-"+ indexOfMum + ".fasta",  mumTmpHeader + indexOfMum
             workerList.append([outputName, referenceName, queryName, specialName])
 
-        useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
+        useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,False)
     
     dataList = []
     
     for i in range(1, 1+numberOfFiles): 
-        if i < 10 and numberOfFiles>=10:
+        if i < 10:
             indexOfMum = "0" + str(i)
         else:
             indexOfMum = str(i)
-
-        dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum))
+        dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum)+"Out")
     
     return dataList 
-
-
-
 

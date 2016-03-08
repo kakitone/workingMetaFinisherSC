@@ -59,11 +59,14 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
     command = bindir + "/finisherSCCoreLib/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + queryFile
     os.system(command)
     
+    os.system("cp *.fasta " + folderName )
+    os.system("rm *.fasta ")
+    
     workerList = []
     
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
-        if dummyI < 10  and numberOfFiles>=10:
+        if dummyI < 10:
             indexOfMum = "0" + str(dummyI)
         else:
             indexOfMum = str(dummyI)
@@ -71,8 +74,8 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
         outputName, referenceName, queryName, specialName= header+indexOfMum, referenceFile,queryFile[0:-6]+".part-"+ indexOfMum + ".fasta" ,  header + indexOfMum
         workerList.append([outputName, referenceName, queryName, specialName])
         
-    alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = True, refinedVersion = False)
-    alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header , numberOfFiles)
+    alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,specialForRaw = False, refinedVersion = False)
+    alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
     
 
 def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFilename, optTypeFileHeader, graphName, needAlignment=True):
@@ -97,7 +100,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
     #if needAlignment:
     #    alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
-    if  needAlignment:
+    if needAlignment:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[header, referenceFile, queryFile, ""]], houseKeeper.globalParallel )
         
     lenDicCC = IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
@@ -125,7 +128,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
         alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header )
     
     lenDicCR = dict(lenDicCC.items() + lenDicRR.items())
-    dataListCR = alignerRobot.extractMumData(folderName, header )
+    dataListCR = alignerRobot.extractMumData(folderName, header + "Out")
     dataListCR = abunHouseKeeper.filterData(dataListCR, lenDicCR)
             
     numberOfNodes = len(lenDicCR) 
@@ -157,7 +160,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
 def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFolderBackup/",optTypeFileHeader="phaseString", contigFilename="improved3", G = [], N1 = 0):
 
-    dataList = alignerRobot.extractMumData(folderName, optTypeFileHeader + "CR" )
+    dataList = alignerRobot.extractMumData(folderName, optTypeFileHeader + "CR" + "Out")
     dataList.sort(key = itemgetter(-2))
     lenDic =  IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
 

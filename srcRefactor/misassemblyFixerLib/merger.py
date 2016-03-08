@@ -167,7 +167,7 @@ def alignSR2LC(folderName, mummerLink, incontigName):
     outputName, referenceName, queryName = "SR2"+incontigName+"Align" , incontigName, "SR" 
     
     if True:
-        dataList = alignerRobot.largeRvsQAlign(folderName, houseKeeper.globalParallelFileNum, mummerLink, referenceName, queryName, outputName)
+        dataList = alignerRobot.largeRvsQAlign(folderName, 20, mummerLink, referenceName, queryName, outputName)
 
     
     dataList.sort(key = itemgetter(-1))
@@ -748,14 +748,11 @@ Only Long reads and long contigs case:
 
 def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
-    #if not mergerGlobalFixerRobot.tuneParaOnly:
-    
-    if True:
+    if not mergerGlobalFixerRobot.tuneParaOnly:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self"+inputName, inputName+".fasta", inputName+".fasta", ""]], houseKeeper.globalParallel )
-
+        
     dataList = alignerRobot.extractMumData(folderName, "self"+inputName+"Out")
     dataList = alignerRobot.transformCoor(dataList)
-    
     lenDic = IORobot.obtainLength(folderName, inputName+'.fasta')
     matchThres = 10000
     nonMatchThres = 500
@@ -781,6 +778,9 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
         repeatIntervalDic = mergerHelper.repeatFinder(folderName, "LC_filtered")
         blkDic = mergerHelper.groupCTest(folderName, repeatIntervalDic)
+
+
+
         #breakLC(folderName, inputName)
         #blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
         #json_data = open(folderName + "blkDicNew.json", 'r')
@@ -980,6 +980,6 @@ def mainFlow(newFolderName, newMummerLink):
         
 
     nonRedundantResolver.removeRedundantWithFile(newFolderName , newMummerLink, "contigs", "mFixingFinalRedundantRemove", finalOutName)
-    os.system("mv *.fasta " + newFolderName)
+
 
 
