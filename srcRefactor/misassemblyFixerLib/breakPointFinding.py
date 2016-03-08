@@ -195,13 +195,17 @@ def fillInHidden(involvedBkPtsList):
 
 	return newItems
 
-def toAddPtsFormat(oldToAddPts, L):
-	oldToAddPts.sort(key = itemgetter(-2,-1))
-	
-	toAddPts = []
-	for key, items in groupby(oldToAddPts, itemgetter(-2,-1)):
-		toAddPts.append(list(items)[0])
 
+
+def filterDuplicate(bkptList):
+	bkptList.sort(key = itemgetter(-2,-1))	
+	newbkptList = []
+	for key, items in groupby(bkptList, itemgetter(-2,-1)):
+		newbkptList.append(list(items)[0])
+	return newbkptList
+
+
+def toAddPtsFormat(toAddPts, L):
 	newToAddPts = []
 	for i in range(len(toAddPts)):
 		tmpItem = toAddPts[i]
@@ -236,11 +240,14 @@ def addHiddenBkPts(bkpts):
 			newItems = fillInHidden(involvedBkPts)
 			toAddPts += newItems
 		
+		# toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
 		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
-		
+		newBkpts =  toAddPts + bkpts
+
+		filteredBkpts = filterDuplicate(newBkpts)
 		# print "len(toAddPts)", len(toAddPts)
-	 	if len(toAddPts) > 0:
-			bkpts = bkpts + toAddPts
+	 	if len(newBkpts) > len(bkpts):
+			bkpts = newBkpts
 		else: 
 			break
 
