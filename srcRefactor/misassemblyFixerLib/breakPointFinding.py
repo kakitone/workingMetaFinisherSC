@@ -253,10 +253,10 @@ def addHiddenBkPts(bkpts):
 		filteredBkpts = filterDuplicate(newBkpts)
 
 		# print "len(toAddPts)", len(toAddPts)
-		print len(newBkpts) , len(bkpts)
+		print len(filteredBkpts) , len(bkpts)
 
-	 	if len(newBkpts) > len(bkpts):
-			bkpts = newBkpts
+	 	if len(filteredBkpts) > len(bkpts):
+			bkpts = filteredBkpts
 		else: 
 			break
 
