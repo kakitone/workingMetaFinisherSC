@@ -754,7 +754,7 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
         # if name1!= name2  and matchLen1> matchThres:
         if name1!= name2   and  ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres or min(start1, start2) > nonMatchThres ) and matchLen1> matchThres:
-            print "eachitem ", eachitem, lenDic[name1], lenDic[name2]
+            # print "eachitem ", eachitem, lenDic[name1], lenDic[name2]
             count = count + 1
             newDataList.append(eachitem)
 
