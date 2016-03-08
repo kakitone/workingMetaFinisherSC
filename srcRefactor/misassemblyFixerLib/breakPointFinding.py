@@ -250,15 +250,13 @@ def addHiddenBkPts(bkpts):
 		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
 		newBkpts =  toAddPts + bkpts
 
-		bkpts = filterDuplicate(newBkpts)
-		#bkpts = newBkpts
+		bkptsfiltered = filterDuplicate(newBkpts)
 
-		
-	return bkpts
+	return bkptsfiltered
 
-def clusterBkPts(oldbkts):	
+def clusterBkPts(newbkts):	
 	### Get merge pairs 
-	newbkts = oldbkts
+	#newbkts = oldbkts
 	#newbkts = filterDuplicate(oldbkts)
 	newbkts.sort(key = itemgetter(-2, -1))
 	mergingPair = []
