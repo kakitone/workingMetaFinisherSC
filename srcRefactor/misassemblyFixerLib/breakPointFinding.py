@@ -242,19 +242,21 @@ def addHiddenBkPts(bkpts):
 			newItems = fillInHidden(involvedBkPts)
 			toAddPts += newItems
 		
+		'''
 		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
 		bkpts = toAddPts + bkpts
+		'''
 
-		#toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
-		#newBkpts =  toAddPts + bkpts
+		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
+		newBkpts =  toAddPts + bkpts
 
-		#filteredBkpts = filterDuplicate(newBkpts)
+		filteredBkpts = filterDuplicate(newBkpts)
 
 		# print "len(toAddPts)", len(toAddPts)
 		#print len(filteredBkpts) , len(bkpts)
 
-	 	#if len(filteredBkpts) > len(bkpts):
-		#	bkpts = filteredBkpts
+	 	if len(filteredBkpts) > len(bkpts):
+			bkpts = filteredBkpts
 		#else: 
 		#	break
 
@@ -262,7 +264,8 @@ def addHiddenBkPts(bkpts):
 
 def clusterBkPts(oldbkts):	
 	### Get merge pairs 
-	newbkts = filterDuplicate(oldbkts)
+	newbks = oldbkts
+	#newbkts = filterDuplicate(oldbkts)
 	newbkts.sort(key = itemgetter(-2, -1))
 	mergingPair = []
 	basicItems = []
