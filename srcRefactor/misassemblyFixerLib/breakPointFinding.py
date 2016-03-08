@@ -476,7 +476,7 @@ def returnBkPtBoolSat(mummerDataList):
 	repeatIntervalDic = pipelineOriginalMethod(returnFormattedBkPtList)
 	print "len(repeatIntervalDic)", len(repeatIntervalDic)
 
-	assert(False)
+	#assert(False)
 	return repeatIntervalDic
 
 
