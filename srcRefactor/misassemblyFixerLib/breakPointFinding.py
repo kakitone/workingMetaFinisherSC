@@ -80,7 +80,7 @@ def locateEnclosedBkPts(repeatIndex, mylist, bkpts, repeatDic):
 			j1_e = j1 + j
 		j += 1 
 	
-	
+
 	j =0 
 	while j < 100:
 		if j2 -j >= 0 and  bkpts[j2 - j][1] == repeatIndex and bkpts[j2 - j][2] == 3:
@@ -203,7 +203,7 @@ def addHiddenBkPts(bkpts):
 	bkPtRepeatSort = [eachitem for eachitem in bkpts]
 	bkPtRepeatSort.sort(key = itemgetter(1))
 
-	for i in range(2):
+	for i in range(1):
 		toAddPts = []
 
 		bkpts.sort(key = itemgetter(-2, -1))
