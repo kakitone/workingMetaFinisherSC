@@ -83,13 +83,14 @@ def locateEnclosedBkPts(repeatIndex, mylist, bkpts, repeatDic):
 
 	j =0 
 
-	
-	if repeatIndex == 31: 
+	'''
+	if  repeatIndex == 31: 
 		for eachitem in bkpts[j2-10 : j2+10]:
 			print eachitem
 	
 		print "-------"
-
+	'''
+	
 	while j < 100:
 		if j2 -j >= 0 and  bkpts[j2 - j][1] == repeatIndex and bkpts[j2 - j][2] == 3:
 			j2_e = j2 - j		
@@ -192,7 +193,6 @@ def fillInHidden(involvedBkPtsList):
 	print "len(newFirstList), len(newSecondList) : " , len(newFirstList), len(newSecondList)
 
 	print len(newItems)
-	
 	'''
 
 	return newItems
@@ -205,9 +205,11 @@ def filterDuplicate(bkptList):
 	for key, items in groupby(bkptList, itemgetter(-2,-1)):
 		newbkptList.append(list(items)[0])
 	
+	'''
 	print "ddddddd" 
 	for eachitem in newbkptList:
 		print eachitem
+	'''
 
 	return newbkptList
 
