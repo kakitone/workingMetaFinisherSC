@@ -90,7 +90,7 @@ def locateEnclosedBkPts(repeatIndex, mylist, bkpts, repeatDic):
 	
 		print "-------"
 	'''
-	
+
 	while j < 100:
 		if j2 -j >= 0 and  bkpts[j2 - j][1] == repeatIndex and bkpts[j2 - j][2] == 3:
 			j2_e = j2 - j		
@@ -204,13 +204,11 @@ def filterDuplicate(bkptList):
 
 	for key, items in groupby(bkptList, itemgetter(-2,-1)):
 		newbkptList.append(list(items)[0])
-	
 	'''
 	print "ddddddd" 
 	for eachitem in newbkptList:
 		print eachitem
 	'''
-
 	return newbkptList
 
 def toAddPtsFormat(toAddPts, L):
