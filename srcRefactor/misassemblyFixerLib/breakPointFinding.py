@@ -226,7 +226,7 @@ def addHiddenBkPts(bkpts):
 	bkPtRepeatSort = [eachitem for eachitem in bkpts]
 	bkPtRepeatSort.sort(key = itemgetter(1))
 
-	while True:
+	for i in range(1) :
 		toAddPts = []
 
 		bkpts.sort(key = itemgetter(-2, -1))
