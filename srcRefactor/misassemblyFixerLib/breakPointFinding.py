@@ -206,7 +206,7 @@ def filterDuplicate(bkptList):
 		newbkptList.append(list(items)[0])
 	
 	print "ddddddd" 
-	for eachitem in newBkpts:
+	for eachitem in newbkptList:
 		print eachitem
 
 	return newbkptList
