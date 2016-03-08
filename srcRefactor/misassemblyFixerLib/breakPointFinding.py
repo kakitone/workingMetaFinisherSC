@@ -268,6 +268,8 @@ def clusterBkPts(newbkts):
 
 	for key , items in groupby(newbkts, itemgetter(-2)):
 		mylist = list(items)
+		mylist.sort(key = itemgetter(-1))
+		
 		basicItems.append(mylist[0][3])
 		for i in range(len(mylist)-1):
 			basicItems.append(mylist[i+1][3])
