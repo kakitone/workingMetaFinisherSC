@@ -87,7 +87,7 @@ def locateEnclosedBkPts(repeatIndex, mylist, bkpts, repeatDic):
 		for eachitem in bkpts[j2-10 : j2+10]:
 			print eachitem
 		
-
+	print "-------"
 	while j < 100:
 		if j2 -j >= 0 and  bkpts[j2 - j][1] == repeatIndex and bkpts[j2 - j][2] == 3:
 			j2_e = j2 - j		
